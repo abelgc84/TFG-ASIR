@@ -1,0 +1,9 @@
+[Unit]
+Description=Servicio para gestionar las copias de seguridad de los directorios home.
+After=mount.service
+
+[Service]
+ExecStart=/home/abel/bin/backups-home.sh
+
+[Install]
+WantedBy=multi-user.target

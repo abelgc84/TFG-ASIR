@@ -1,0 +1,9 @@
+[Unit]
+Description=Servicio para montar un recurso NFS
+After=network.target
+
+[Service]
+ExecStart=/home/abel/bin/mount.sh
+
+[Install]
+WantedBy=multi-user.target

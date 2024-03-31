@@ -17,6 +17,8 @@
 salida=0
 fechaActual=$(date +"%Y%m%d")
 backupDestino="/backup/$USER"
+backupHome="/backup/home"
+backupEtc="/backup/etc"
 configHome="/backup/config/backups-home.conf"
 configEtc="/backup/config/backups-etc.conf"
 
@@ -502,9 +504,85 @@ eliminarConfiguracionEtc () {
     preguntar "$pregunta"
     if [ $? -eq 0 ]; then
         # Escapamos los caracteres especiales de la configuración para que sed no los interprete
+        # sed 's/[^-A-Za-z0-9_]/\\&/g') - Indica que se reemplazan todos los caracteres que no sean letras, números o guiones bajos por el mismo caracter escapado (\)
         configuracionEscapada=$(echo $configuracion | sed 's/[^-A-Za-z0-9_]/\\&/g')
         sed -i "/$configuracionEscapada/d" $configEtc
     fi
+}
+
+#################################################
+# mostrarUsuariosConConfiguracion
+# Muestra los usuarios que tienen una configuración de copias de seguridad
+#################################################
+mostrarUsuariosConConfiguracion () {
+    usuarios=$(awk -F: '$1==$2 {print $1}' $configHome)
+    zenity --list \
+        --title="Usuarios con configuración de copias de seguridad" \
+        --width="600" \
+        --height="500" \
+        --multiple \
+        --separator=" " \
+        --column="Usuario" \
+        $usuarios
+}
+
+#################################################
+# mostrarGruposConConfiguracion
+# Muestra los grupos que tienen una configuración de copias de seguridad
+#################################################
+mostrarGruposConConfiguracion () {
+    grupos=$(awk -F: '$1!=$2 {print $2}' $configHome|sort -u)
+    zenity --list \
+        --title="Grupos con configuración de copias de seguridad" \
+        --width="600" \
+        --height="500" \
+        --multiple \
+        --separator=" " \
+        --column="Grupo" \
+        $grupos
+}
+
+#################################################
+# mostrarCopiasSeguridadHome
+# Muestra las copias de seguridad existentes con Zenity
+# Parámetros:
+#  $1: Usuario o grupo
+#################################################
+mostrarCopiasSeguridadHome () {
+    zenity --list \
+        --title="Copias de seguridad de $1" \
+        --width="600" \
+        --height="500" \
+        --column="Copia de seguridad" \
+        $(ls -1 $backupHome|grep $1)
+}
+
+#################################################
+# introducirDirectorioRestauracion
+# Solicita el directorio de restauración con Zenity
+# Salida:
+#   Directorio de restauración
+#################################################
+introducirDirectorioRestauracion () {
+    zenity --file-selection \
+        --title="Selecciona un directorio para la restauración" \
+        --directory
+}
+
+#################################################
+# restaurarCopiaSeguridad
+# Restaura una copia de seguridad en el directorio original o en un directorio específico
+# Parámetros:
+#  $1: Copia de seguridad
+#  $2: Directorio de restauración
+#################################################
+restaurarCopiaSeguridad () {
+    copia=$1
+    directorio=$2
+    sudo tar -xzvf $backupHome/$copia -C /
+    usuario=$(echo $copia | cut -d- -f2)
+    grupo=$(echo $copia | cut -d- -f3)
+    sudo chown -R $usuario:$grupo $directorio
 }
 
 #############################################################################################################
@@ -767,11 +845,103 @@ while [ $salida -eq 0 ]; do
                     case $menu in
                     1)  # Restaurar copias de seguridad de directorios de trabajo
                         
-                        echo "Restaurar copias de seguridad de directorios de trabajo"
+                        menu=$(mostrarMenu "Restaurar copias de seguridad de directorios de trabajo" \
+                            "Opción" "Descripción" \
+                            "1" "Restaurar copias de usuarios" \
+                            "2" "Restaurar copias de grupos" \
+                            "3" "Salir")
+                        if [ $? -eq 0 ]; then
+                            case $menu in
+                            1)  # Restaurar copias de usuarios
+                                
+                                menu=$(mostrarMenu "Restaurar copias de un usuario" \
+                                    "Opción" "Descripción" \
+                                    "1" "Restaurar en el directorio original" \
+                                    "2" "Restaurar en un directorio específico" \
+                                    "3" "Salir")
+                                if [ $? -eq 0 ]; then
+                                    case $menu in
+                                    1)  # Restaurar en el directorio original
+                                        
+                                        usuarios=$(mostrarUsuariosConConfiguracion)
+                                        if [ $? -eq 0 ]; then
+                                            for usuario in $usuarios; do
+                                                directorio=$(eval echo ~$usuario)
+                                                copia=$(mostrarCopiasSeguridadHome $usuario)
+                                                if [ $? -eq 0 ]; then    
+                                                    restaurarCopiaSeguridad $copia $directorio
+                                                fi
+                                            done
+                                        fi
+                                    ;;
+                                    2)  # Restaurar en un directorio específico
+                                        
+                                        echo "Restaurar en un directorio específico"
+                                    ;;
+                                    3)  # Salir
+                                        
+                                        salida=1
+                                    ;;
+                                    esac
+                                fi
+                            ;;
+                            2)  # Restaurar copias de grupos
+                                
+                                grupos=$(mostrarGruposConConfiguracion)
+                                if [ $? -eq 0 ]; then
+                                    menu=$(mostrarMenu "Restaurar copias de un grupo" \
+                                        "Opción" "Descripción" \
+                                        "1" "Restaurar en el directorio original" \
+                                        "2" "Restaurar en un directorio específico" \
+                                        "3" "Salir")
+                                    if [ $? -eq 0 ]; then
+                                        case $menu in
+                                        1)  # Restaurar en el directorio original
+                                            
+                                            echo "Restaurar en el directorio original"
+                                        ;;
+                                        2)  # Restaurar en un directorio específico
+                                            
+                                            echo "Restaurar en un directorio específico"
+                                        ;;
+                                        3)  # Salir
+                                            
+                                            salida=1
+                                        ;;
+                                        esac
+                                    fi
+                                fi
+                            ;;
+                            3)  # Salir
+                                
+                                salida=1
+                            ;;
+                            esac
+                        fi
                     ;;
                     2)  # Restaurar copias de seguridad de archivos de configuración
                         
-                        echo "Restaurar copias de seguridad de archivos de configuración"
+                        menu=$(mostrarMenu "Restaurar copias de seguridad de archivos de configuración" \
+                            "Opción" "Descripción" \
+                            "1" "Restarurar en el directorio original" \
+                            "2" "Restaurar en un directorio específico" \
+                            "3" "Salir")
+                        if [ $? -eq 0 ]; then
+                            case $menu in
+                            1)  # Restarurar en el directorio original
+                                
+                                echo "Restarurar en el directorio original"
+                            ;;
+                            2)  # Restaurar en un directorio específico
+                                
+                                echo "Restaurar en un directorio específico"
+                            ;;
+                            3)  # Salir
+                                
+                                salida=1
+                            ;;
+                            esac
+                        fi
                     ;;
                     3)  # Salir
                         

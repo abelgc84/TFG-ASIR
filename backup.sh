@@ -168,6 +168,23 @@ extraerNombre () {
 }
 
 #################################################
+# invertirFecha
+# Invierte la fecha entre los formatos AAAAMMDD y DD/MM/YYYY
+# Parámetros:
+#   $1: Fecha en un formato u otro
+# Salida:
+#   Fecha invertida
+#################################################
+invertirFecha () {
+    fecha=$1
+    if [[ $fecha =~ ^[0-9]{8}$ ]]; then
+        echo ${fecha:6:2}/${fecha:4:2}/${fecha:0:4}
+    else
+        echo ${fecha:6:4}${fecha:3:2}${fecha:0:2}
+    fi
+}
+
+#################################################
 # extraerUsuarios
 # Extrae los usuarios de una lista de grupos
 # Parámetros:
@@ -558,6 +575,27 @@ mostrarCopiasSeguridadHome () {
 }
 
 #################################################
+# mostrarCopiasSeguridadHomeGrupos
+# Muestra la fecha en formato DD/MM/YYYY de las copias de seguridad únicas de un grupo
+# Parámetros:
+#  $1: Grupo
+#################################################
+mostrarCopiasSeguridadHomeGrupos () {
+    copias=$(ls $backupHome|grep $1|cut -d- -f1|sort -u)
+    fechas=""
+    for copia in $copias; do
+        fecha=$(invertirFecha $copia)
+        fechas="$fechas $fecha"
+    done
+    zenity --list \
+        --title="Copias de seguridad de $1" \
+        --width="600" \
+        --height="500" \
+        --column="Fecha" \
+        $fechas
+}
+
+#################################################
 # introducirDirectorioRestauracion
 # Solicita el directorio de restauración con Zenity
 # Salida:
@@ -570,16 +608,32 @@ introducirDirectorioRestauracion () {
 }
 
 #################################################
-# restaurarCopiaSeguridad
-# Restaura una copia de seguridad en el directorio original o en un directorio específico
+# restaurarCopiaSeguridadOriginal
+# Restaura una copia de seguridad en el directorio original
 # Parámetros:
 #  $1: Copia de seguridad
 #  $2: Directorio de restauración
 #################################################
-restaurarCopiaSeguridad () {
+restaurarCopiaSeguridadOriginal () {
     copia=$1
     directorio=$2
-    sudo tar -xzvf $backupHome/$copia -C /
+    sudo tar -xzf $backupHome/$copia -C /
+    usuario=$(echo $copia | cut -d- -f2)
+    grupo=$(echo $copia | cut -d- -f3)
+    sudo chown -R $usuario:$grupo $directorio
+}
+
+#################################################
+# restaurarCopiaSeguridadEspecifico
+# Restaura una copia de seguridad en un directorio específico
+# Parámetros:
+#  $1: Copia de seguridad
+#  $2: Directorio de restauración
+#################################################
+restaurarCopiaSeguridadEspecifico () {
+    copia=$1
+    directorio=$2
+    sudo tar -xzf $backupHome/$copia -C $directorio
     usuario=$(echo $copia | cut -d- -f2)
     grupo=$(echo $copia | cut -d- -f3)
     sudo chown -R $usuario:$grupo $directorio
@@ -638,9 +692,11 @@ while [ $salida -eq 0 ]; do
                             else
                                 mostrarMensaje "Introduzca la configuración de copias de seguridad para el usuario $usuario"
                                 configuracion=$(configurarCopiasSeguridad)
-                                verificarDirectorioConfiguracion
-                                # Guardamos la configuración en $configHome. Estructura; usuario:grupo:numCopias:numDias
-                                echo "$usuario:$usuario:$configuracion" >> $configHome
+                                if [ $? -eq 0 ]; then
+                                    verificarDirectorioConfiguracion
+                                    # Guardamos la configuración en $configHome. Estructura; usuario:grupo:numCopias:numDias
+                                    echo "$usuario:$usuario:$configuracion" >> $configHome
+                                fi
                             fi
                         done
                     ;;
@@ -657,13 +713,15 @@ while [ $salida -eq 0 ]; do
                             else
                                 mostrarMensaje "Introduzca la configuración de copias de seguridad para el grupo $grupo"
                                 configuracion=$(configurarCopiasSeguridad)
-                                usuarios=$(extraerUsuarios $grupo)
-                                # Iteramos sobre los usuarios del grupo
-                                for usuario in $usuarios; do                                
-                                    verificarDirectorioConfiguracion
-                                    # Guardamos la configuración en $configHome. Estructura; usuario:grupo:numCopias:numDias
-                                    echo "$usuario:$grupo:$configuracion" >> $configHome
-                                done
+                                if [ $? -eq 0 ]; then
+                                    usuarios=$(extraerUsuarios $grupo)
+                                    # Iteramos sobre los usuarios del grupo
+                                    for usuario in $usuarios; do                                
+                                        verificarDirectorioConfiguracion
+                                        # Guardamos la configuración en $configHome. Estructura; usuario:grupo:numCopias:numDias
+                                        echo "$usuario:$grupo:$configuracion" >> $configHome
+                                    done
+                                fi
                             fi
                         done
                     ;;
@@ -698,9 +756,11 @@ while [ $salida -eq 0 ]; do
                             else
                                 mostrarMensaje "Introduzca la configuración de copias de seguridad para el archivo $archivo"
                                 configuracion=$(configurarCopiasSeguridad)
-                                verificarDirectorioConfiguracion
-                                # Guardamos la configuración en $configEtc. Estructura; archivo:numCopias:numDias
-                                echo "$archivo:$configuracion" >> $configEtc
+                                if [ $? -eq 0 ]; then
+                                    verificarDirectorioConfiguracion
+                                    # Guardamos la configuración en $configEtc. Estructura; archivo:numCopias:numDias
+                                    echo "$archivo:$configuracion" >> $configEtc
+                                fi
                             fi
                         done
                     ;;
@@ -720,9 +780,11 @@ while [ $salida -eq 0 ]; do
                                 mensaje=$(echo "Introduzca la configuración de copias de seguridad para el directorio $directorio")
                                 mostrarMensaje "$mensaje"
                                 configuracion=$(configurarCopiasSeguridad)
-                                verificarDirectorioConfiguracion
-                                # Guardamos la configuración en $configEtc. Estructura; directorio:numCopias:numDias
-                                echo "$directorio:$configuracion" >> $configEtc
+                                if [ $? -eq 0 ]; then
+                                    verificarDirectorioConfiguracion
+                                    # Guardamos la configuración en $configEtc. Estructura; directorio:numCopias:numDias
+                                    echo "$directorio:$configuracion" >> $configEtc
+                                fi
                             fi
                         done
                     ;;
@@ -866,17 +928,29 @@ while [ $salida -eq 0 ]; do
                                         usuarios=$(mostrarUsuariosConConfiguracion)
                                         if [ $? -eq 0 ]; then
                                             for usuario in $usuarios; do
+                                                # eval permite expandir el contenido de la variable $usuario antes de ejecutar el comando
                                                 directorio=$(eval echo ~$usuario)
                                                 copia=$(mostrarCopiasSeguridadHome $usuario)
                                                 if [ $? -eq 0 ]; then    
-                                                    restaurarCopiaSeguridad $copia $directorio
+                                                    restaurarCopiaSeguridadOriginal $copia $directorio
                                                 fi
                                             done
                                         fi
                                     ;;
                                     2)  # Restaurar en un directorio específico
                                         
-                                        echo "Restaurar en un directorio específico"
+                                        usuarios=$(mostrarUsuariosConConfiguracion)
+                                        if [ $? -eq 0 ]; then                                            
+                                            for usuario in $usuarios; do
+                                                if [ $? -eq 0 ]; then
+                                                    directorio=$(introducirDirectorioRestauracion)
+                                                    copia=$(mostrarCopiasSeguridadHome $usuario)
+                                                    if [ $? -eq 0 ]; then    
+                                                        restaurarCopiaSeguridadEspecifico $copia $directorio
+                                                    fi
+                                                fi
+                                            done
+                                        fi
                                     ;;
                                     3)  # Salir
                                         
@@ -887,29 +961,54 @@ while [ $salida -eq 0 ]; do
                             ;;
                             2)  # Restaurar copias de grupos
                                 
-                                grupos=$(mostrarGruposConConfiguracion)
+                                menu=$(mostrarMenu "Restaurar copias de un usuario" \
+                                    "Opción" "Descripción" \
+                                    "1" "Restaurar en el directorio original" \
+                                    "2" "Restaurar en un directorio específico" \
+                                    "3" "Salir")
                                 if [ $? -eq 0 ]; then
-                                    menu=$(mostrarMenu "Restaurar copias de un grupo" \
-                                        "Opción" "Descripción" \
-                                        "1" "Restaurar en el directorio original" \
-                                        "2" "Restaurar en un directorio específico" \
-                                        "3" "Salir")
-                                    if [ $? -eq 0 ]; then
-                                        case $menu in
-                                        1)  # Restaurar en el directorio original
-                                            
-                                            echo "Restaurar en el directorio original"
-                                        ;;
-                                        2)  # Restaurar en un directorio específico
-                                            
-                                            echo "Restaurar en un directorio específico"
-                                        ;;
-                                        3)  # Salir
-                                            
-                                            salida=1
-                                        ;;
-                                        esac
-                                    fi
+                                    case $menu in
+                                    1)  # Restaurar en el directorio original
+                                        
+                                        grupos=$(mostrarGruposConConfiguracion)
+                                        if [ $? -eq 0 ]; then
+                                            for grupo in $grupos; do
+                                                copiaFecha=$(mostrarCopiasSeguridadHomeGrupos $grupo)
+                                                if [ $? -eq 0 ]; then    
+                                                    usuarios=$(extraerUsuarios $grupo)
+                                                    for usuario in $usuarios; do
+                                                        directorio=$(eval echo ~$usuario)
+                                                        copiaFechaInvertida=$(invertirFecha $copiaFecha)
+                                                        copia=$(ls $backupHome|grep $copiaFechaInvertida|grep $usuario)
+                                                        restaurarCopiaSeguridadOriginal $copia $directorio
+                                                    done
+                                                fi                                                
+                                            done
+                                        fi
+                                    ;;
+                                    2)  # Restaurar en un directorio específico
+                                        
+                                        grupos=$(mostrarGruposConConfiguracion)
+                                        if [ $? -eq 0 ]; then
+                                            for grupo in $grupos; do
+                                                copiaFecha=$(mostrarCopiasSeguridadHomeGrupos $grupo)
+                                                if [ $? -eq 0 ]; then
+                                                    directorio=$(introducirDirectorioRestauracion)
+                                                    usuarios=$(extraerUsuarios $grupo)
+                                                    for usuario in $usuarios; do
+                                                        copiaFechaInvertida=$(invertirFecha $copiaFecha)
+                                                        copia=$(ls $backupHome|grep $copiaFechaInvertida|grep $usuario)
+                                                        restaurarCopiaSeguridadEspecifico $copia $directorio
+                                                    done
+                                                fi
+                                            done
+                                        fi
+                                    ;;
+                                    3)  # Salir
+                                        
+                                        salida=1
+                                    ;;
+                                    esac
                                 fi
                             ;;
                             3)  # Salir

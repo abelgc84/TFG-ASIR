@@ -35,34 +35,24 @@ eliminarLineasBlanco() {
 }
 
 #################################################
-# extraerNombre
-# Extrae el nombre de un archivo o directorio de una ruta absoluta
-# Parámetros:
-#   $1: Ruta absoluta del archivo o directorio
-# Salida:
-#   Nombre del archivo o directorio
-#################################################
-extraerNombre () {
-    ruta=$1
-    nombre="$(basename "$ruta")"
-    echo $nombre
-}
-
-#################################################
 # copiaSeguridadCompleta
 # Realiza una copia de seguridad completa de un archivo o directorio
+# Parámetros:
+#   $1: Ruta del archivo o directorio
 #################################################
 copiaSeguridadCompleta () {
     usuario=$(stat -c "%U" $fichero)
     grupo=$(stat -c "%G" $fichero)
-    nombre=$(extraerNombre $fichero)
+    nombre=$nombreFichero
     destino="$backupDestino/$fechaActual-$usuario-$grupo-$nombre"
-    tar -czf "$destino".tar.gz $fichero
+    sudo tar -czf "$destino".tar.gz $fichero
 }
 
 #################################################
 # eliminarCopiasAntiguas
 # Elimina las copias antiguas de un archivo o directorio
+# Parámetros:
+#   $1: Ruta del archivo o directorio
 #################################################
 eliminarCopiasAntiguas () {
     numCopiasActuales=$(ls $backupDestino|grep $nombreFichero| wc -l)
@@ -90,12 +80,9 @@ while true; do
             mkdir -p $backupDestino
         fi
 
-        # Extraemos el nombre del fichero.
-        nombreFichero=$(extraerNombre $fichero)
-#echo "nombre: $nombreFichero"
+        nombreFichero=$(echo $fichero|tr '/' '_')
         # Contamos el número de copias que hay.
         numCopiasActuales=$(ls $backupDestino|grep $nombreFichero|wc -l)
-#echo "numCopias: $numCopiasActuales"
         # Realizamos la primera copia en caso de no tener ninguna.
         if [ $numCopiasActuales -eq 0 ]; then
             copiaSeguridadCompleta
@@ -105,7 +92,6 @@ while true; do
         ultimaCopia=$(ls -t $backupDestino|grep $nombreFichero|head -1)
         fechaUltimaCopia=$(echo $ultimaCopia|cut -d'-' -f1)
         diasTranscurridos=$((($(date +%s) - $(date -d $fechaUltimaCopia +%s)) / 86400))
-#echo "diferencia días: $diasTranscurridos"
         # Realizamos la copia si han pasado los días indicados.
         if [ $diasTranscurridos -ge $numDias ]; then
             copiaSeguridadCompleta
@@ -115,5 +101,4 @@ while true; do
         eliminarCopiasAntiguas
 
     done < $configEtc
-
 done

@@ -713,8 +713,9 @@ while [ $salida -eq 0 ]; do
             "2" "Configurar copias de seguridad de archivos de configuración" \
             "3" "Acceder a la configuración de copias de seguridad" \
             "4" "Restaurar copias de seguridad" \
-            "5" "Aplicación para usuarios" \
-            "6" "Salir")
+            "5" "Borrar copias de seguridad" \
+            "6" "Aplicación para usuarios" \
+            "7" "Salir")
         if [ $? -eq 0 ]; then
             case $main in
             1)
@@ -1118,14 +1119,93 @@ while [ $salida -eq 0 ]; do
                     esac
                 fi
             ;;
-            5) # Aplicación para usuarios
+            5) # Borrar copias de seguridad
 
-                preguntar "¿Desea cambiar a la aplicación para usuarios?"
+                menu=$(mostrarMenu "Borrar copias de seguridad" \
+                    "Opción" "Descripción" \
+                    "1" "Borrar copias de seguridad de directorios de trabajo" \
+                    "2" "Borrar copias de seguridad de archivos de configuración" \
+                    "3" "Salir")
                 if [ $? -eq 0 ]; then
-                    permisos="usuario"
+                    case $menu in
+                    1) # Borrar copias de seguridad de directorios de trabajo"
+
+                        menu=$(mostrarMenu "Borrar copias de seguridad de directorios de trabajo" \
+                            "Opción" "Descripción" \
+                            "1" "Borrar copias de seguridad de usuarios" \
+                            "2" "Borrar copias de seguridad de grupos" \
+                            "3" "Salir")
+                        if [ $? -eq 0 ]; then
+                            case $menu in
+                            1) # Borrar copias de seguridad de usuarios
+
+                                usuarios=$(mostrarUsuariosConConfiguracion)
+                                if [ $? -eq 0 ]; then
+                                    # Iteramos sobre los usuarios seleccionados
+                                    for usuario in $usuarios; do
+                                        copia=$(mostrarCopiasSeguridadHome $usuario)
+                                        if [ $? -eq 0 ]; then
+                                            eliminarConfiguracionHomeUsuario $usuario                                            
+                                            pregunta=$(echo "¿Desea borrar la copia de seguridad $copia?")
+                                            preguntar "$pregunta"
+                                            if [ $? -eq 0 ]; then
+                                                sudo rm $backupHome/$copia
+                                            fi
+                                        fi
+                                    done
+                                fi
+                            ;;
+                            2) # Borrar copias de seguridad de grupos
+
+                                grupos=$(mostrarGruposConConfiguracion)
+                                if [ $? -eq 0 ]; then
+                                    # Iteramos sobre los grupos seleccionados
+                                    for grupo in $grupos; do
+                                        copiaFecha=$(mostrarCopiasSeguridadHomeGrupos $grupo)
+                                        if [ $? -eq 0 ]; then
+                                            eliminarConfiguracionHomeGrupo $grupo
+                                            pregunta=$(echo "¿Desea borrar las copias del grupo $grupo con fecha $copiaFecha?")
+                                            preguntar "$pregunta"
+                                            if [ $? -eq 0 ]; then
+                                                usuarios=$(extraerUsuarios $grupo)
+                                                # Iteramos sobre los usuarios de cada grupo
+                                                for usuario in $usuarios; do
+                                                    copiaFechaInvertida=$(invertirFecha $copiaFecha)
+                                                    copia=$(ls $backupHome|grep $copiaFechaInvertida|grep $usuario)
+                                                    echo "copia: $copia"
+                                                    if [ $? -eq 0 ]; then
+                                                        sudo rm $backupHome/$copia
+                                                    fi
+                                                done
+                                            fi
+                                        fi
+                                    done
+                                fi
+                            ;;
+                            3) # Salir
+
+                                salida=1
+                            ;;
+                            esac
+                        fi
+                    ;;
+                    2) # Borrar copias de seguridad de archivos de configuración
+
+                        echo "Borrar copias de seguridad de archivos de configuración"
+                    ;;
+                    3) # Salir
+
+                        salida=1
+                    ;;
+                    esac
                 fi
             ;;
-            6) # Salir
+            6) # Aplicación para usuarios
+
+                salida=1
+                backupUser.sh
+            ;;
+            7) # Salir
 
                 salida=1
             ;;
@@ -1134,129 +1214,7 @@ while [ $salida -eq 0 ]; do
             salida=1
         fi
     else 
-        # Menú para usuarios
-        main=$(mostrarMenu "Copia de seguridad para usuarios" \
-            "Opción" "Descripción" \
-            "1" "Realizar copia de seguridad completa" \
-            "2" "Configurar copias de seguridad incrementales" \
-            "3" "Configurar directorio espejo" \
-            "4" "Restaurar copias de seguridad" \
-            "5" "Salir")
-
-        if [ $? -eq 0 ]; then
-            case $main in
-            1)  # Realizar copia de seguridad completa
-                
-                menu=$(mostrarMenu "Realizar copia de seguridad completa" \
-                    "Opción" "Descripción" \
-                    "1" "Seleccionar archivos" \
-                    "2" "Seleccionar directorios" \
-                    "3" "Salir")
-
-                if [ $? -eq 0 ]; then
-                    case $menu in
-                    1)  # Seleccionar archivos
-                        
-                        echo "Seleccionar archivos"
-                    ;;
-                    2)  # Seleccionar directorios
-                        
-                        echo "Seleccionar directorios"
-                    ;;
-                    3)  # Salir
-                        
-                        salida=1
-                    ;;
-                    esac
-                fi
-            ;;
-            2)  # Configurar copias de seguridad incrementales
-                
-                menu=$(mostrarMenu "Configurar copias de seguridad incrementales" \
-                    "Opción" "Descripción" \
-                    "1" "Crear nueva configuración" \
-                    "2" "Modificar configuración" \
-                    "3" "Eliminar configuración" \
-                    "4" "Salir")
-
-                if [ $? -eq 0 ]; then
-                    case $menu in
-                    1)  # Crear nueva configuración
-                        
-                        echo "Crear nueva configuración"
-                    ;;
-                    2)  # Modificar configuración
-                        
-                        echo "Modificar configuración"
-                    ;;
-                    3)  # Eliminar configuración
-                        
-                        echo "Eliminar configuración"
-                    ;;
-                    4)  # Salir
-                        
-                        salida=1
-                    ;;
-                    esac
-                fi
-            ;;
-            3)  # Configurar directorio espejo
-                
-                menu=$(mostrarMenu "Configurar directorio espejo" \
-                    "Opción" "Descripción" \
-                    "1" "Añadir directorio espejo" \
-                    "2" "Eliminar directorio espejo" \
-                    "3" "Salir")
-
-                if [ $? -eq 0 ]; then
-                    case $menu in
-                    1)  # Añadir directorio espejo
-                        
-                        echo "Añadir directorio espejo"
-                    ;;
-                    2)  # Eliminar directorio espejo
-                        
-                        echo "Eliminar directorio espejo"
-                    ;;
-                    3)  # Salir
-                        
-                        salida=1
-                    ;;
-                    esac
-                fi
-            ;;
-            4)  # Resturar copias de seguridad
-                
-                menu=$(mostrarMenu "Restaurar copias de seguridad" \
-                    "Opción" "Descripción" \
-                    "1" "Restaurar copias de seguridad completas" \
-                    "2" "Restaurar copias de seguridad incrementales" \
-                    "3" "Salir")
-
-                if [ $? -eq 0 ]; then
-                    case $menu in
-                    1)  # Restaurar copias de seguridad completas
-                        
-                        echo "Restaurar copias de seguridad completas"
-                    ;;
-                    2)  # Restaurar copias de seguridad incrementales
-                        
-                        echo "Restaurar copias de seguridad incrementales"
-                    ;;
-                    3)  # Salir
-                        
-                        salida=1
-                    ;;
-                    esac
-                fi
-            ;;
-            5) # Salir
-            
-                salida=1
-            ;;
-            esac
-        else
-            salida=1
-        fi
+        error=$(echo "No tiene permisos para ejecutar la aplicación")
+        mostrarError "$error"
     fi
 done

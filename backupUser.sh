@@ -47,6 +47,79 @@ mostrarMenu () {
            "$@"
 }
 
+#################################################
+# seleccionarArchivo
+# Muestra una ventana de selección de archivos con Zenity
+# Salida:
+#   Lista de archivos seleccionados separados por espacios
+#################################################
+seleccionarArchivo () {
+    zenity --title="Selecciona archivos" \
+        --file-selection \
+        --multiple \
+        --separator=" "
+}
+
+#################################################
+# seleccionarDirectorio
+# Muestra una ventana de selección de directorios con Zenity
+# Salida:
+#   Lista de directorios seleccionados separados por espacios
+#################################################
+seleccionarDirectorio () {
+    zenity --title="Selecciona un directorio" \
+        --file-selection \
+        --multiple \
+        --separator=" " \
+        --directory
+}
+
+#################################################
+# mostrarMensaje
+# Muestra un mensaje con Zenity
+# Parámetros:
+#   $1: Mensaje a mostrar
+#################################################
+mostrarMensaje () {
+    zenity --info \
+        --width="600" \
+        --text="$1"
+}
+
+#################################################
+# mostrarError
+# Muestra un mensaje de error con Zenity
+# Parámetros:
+#   $1: Mensaje de error
+#################################################
+mostrarError () {
+    zenity --error \
+        --width="600" \
+        --text="$1"
+}
+
+#################################################
+# preguntar
+# Muestra una pregunta con Zenity
+# Parámetros:
+#   $1: Pregunta
+# Salida:
+#   0: Si se pulsa el botón Aceptar
+#   1: Si se pulsa el botón Cancelar
+#################################################
+preguntar () {
+    zenity --question \
+        --width="600" \
+        --text="$1"
+}
+
+
+#############################################################################################################
+#
+# Cuerpo del script.
+#
+#############################################################################################################
+
 # Menú para usuarios
 main=$(mostrarMenu "Copia de seguridad para usuarios" \
     "Opción" "Descripción" \

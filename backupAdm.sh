@@ -58,13 +58,14 @@ while [ $salida -eq 0 ]; do
                     1)  # Configuración de copias de seguridad para usuario
                         
                         usuarios=$(mostrarUsuarios)
-                        # Iteramos sobre los usuarios seleccionados
                         for usuario in $usuarios; do
                             # Verificamos si el usuario tiene una configuración previa.
-                            cat $configHome|grep $usuario:>/dev/null
-                            if [ $? -eq 0 ]; then
-                                mensaje=$(echo "El usuario $usuario ya tiene una configuración previa")
-                                mostrarMensaje "$mensaje"
+                            if [ `cat $configHome|grep $usuario:` ]; then
+                                pregunta=$(echo -e "El usuario $usuario ya tiene una configuración previa. \n¿Desea modificarla?")
+                                preguntar "$pregunta"
+                                if [ $? -eq 0 ]; then
+                                    modificarConfiguracionHomeUsuario $usuario
+                                fi
                             else
                                 mostrarMensaje "Introduzca la configuración de copias de seguridad para el usuario $usuario"
                                 configuracion=$(configurarCopiasSeguridad)
@@ -82,23 +83,26 @@ while [ $salida -eq 0 ]; do
                     2)  # Configuración de copias de seguridad para grupos
                         
                         grupos=$(mostrarGrupos)                   
-                        # Iteramos sobre los grupos seleccionados
                         for grupo in $grupos; do
                             # Verificamos si el grupo tiene una configuración previa.
-                            cat $configHome|grep :$grupo:>/dev/null
-                            if [ $? -eq 0 ]; then
-                                mensaje=$(echo "El grupo $grupo ya tiene una configuración previa")
-                                mostrarMensaje "$mensaje"
+                            if [ `cat $configHome|grep :$grupo:` ]; then
+                                pregunta=$(echo -e "El grupo $grupo ya tiene una configuración previa. \n¿Desea modificarla?")
+                                preguntar "$pregunta"
+                                if [ $? -eq 0 ]; then
+                                    modificarConfiguracionHomeGrupo $grupo
+                                fi
                             else
                                 mostrarMensaje "Introduzca la configuración de copias de seguridad para el grupo $grupo"
                                 configuracion=$(configurarCopiasSeguridad)
                                 if [ $? -eq 0 ]; then
                                     usuarios=$(extraerUsuarios $grupo)
-                                    # Iteramos sobre los usuarios del grupo
-                                    for usuario in $usuarios; do                                
-                                        verificarDirectorioConfiguracion
-                                        # Guardamos la configuración en $configHome. Estructura; usuario:grupo:numCopias:numDias
-                                        echo "$usuario:$grupo:$configuracion" >> $configHome
+                                    for usuario in $usuarios; do
+                                        # Verificamos que la configuración no sea nula
+                                        if [ ! -z $configuracion ]; then
+                                            verificarDirectorioConfiguracion
+                                            # Guardamos la configuración en $configHome. Estructura; usuario:grupo:numCopias:numDias
+                                            echo "$usuario:$grupo:$configuracion" >> $configHome
+                                        fi
                                     done
                                 fi
                             fi
@@ -126,20 +130,24 @@ while [ $salida -eq 0 ]; do
                         cd /etc
                         archivos=$(seleccionarArchivo)
                         cd ->/dev/null
-                        # Iteramos sobre los archivos seleccionados
                         for archivo in $archivos; do
                             # Verificamos si el archivo tiene una configuración previa.
-                            cat $configEtc|grep $archivo:>/dev/null
-                            if [ $? -eq 0 ]; then
-                                mensaje=$(echo "El archivo $archivo ya tiene una configuración previa")
-                                mostrarMensaje "$mensaje"
+                            if [ `cat $configEtc|grep $archivo:` ]; then
+                                pregunta=$(echo -e "El archivo $archivo ya tiene una configuración previa. \n¿Desea modificarla?")
+                                preguntar "$pregunta"
+                                if [ $? -eq 0 ]; then
+                                    modificarConfiguracionEtc $archivo
+                                fi
                             else
                                 mostrarMensaje "Introduzca la configuración de copias de seguridad para el archivo $archivo"
                                 configuracion=$(configurarCopiasSeguridad)
                                 if [ $? -eq 0 ]; then
-                                    verificarDirectorioConfiguracion
-                                    # Guardamos la configuración en $configEtc. Estructura; archivo:numCopias:numDias
-                                    echo "$archivo:$configuracion" >> $configEtc
+                                    # Verificamos que la configuración no sea nula
+                                    if [ ! -z $configuracion ]; then
+                                        verificarDirectorioConfiguracion
+                                        # Guardamos la configuración en $configEtc. Estructura; archivo:numCopias:numDias
+                                        echo "$archivo:$configuracion" >> $configEtc
+                                    fi
                                 fi
                             fi
                         done
@@ -149,21 +157,25 @@ while [ $salida -eq 0 ]; do
                         cd /etc
                         directorios=$(seleccionarDirectorio)
                         cd ->/dev/null
-                        # Iteramos sobre los directorios seleccionados
                         for directorio in $directorios; do
                             # Verificamos si el directorio tiene una configuración previa.
-                            cat $configEtc|grep $directorio:>/dev/null
-                            if [ $? -eq 0 ]; then
-                                mensaje=$(echo "El directorio $directorio ya tiene una configuración previa")
-                                mostrarMensaje "$mensaje"
+                            if [ `cat $configEtc|grep $directorio:` ]; then
+                                pregunta=$(echo -e "El directorio $directorio ya tiene una configuración previa. \n¿Desea modificarla?")
+                                preguntar "$pregunta"
+                                if [ $? -eq 0 ]; then
+                                    modificarConfiguracionEtc $directorio
+                                fi
                             else
                                 mensaje=$(echo "Introduzca la configuración de copias de seguridad para el directorio $directorio")
                                 mostrarMensaje "$mensaje"
                                 configuracion=$(configurarCopiasSeguridad)
                                 if [ $? -eq 0 ]; then
-                                    verificarDirectorioConfiguracion
-                                    # Guardamos la configuración en $configEtc. Estructura; directorio:numCopias:numDias
-                                    echo "$directorio:$configuracion" >> $configEtc
+                                    # Verificamos que la configuración no sea nula
+                                    if [ ! -z $configuracion ]; then
+                                        verificarDirectorioConfiguracion
+                                        # Guardamos la configuración en $configEtc. Estructura; directorio:numCopias:numDias
+                                        echo "$directorio:$configuracion" >> $configEtc
+                                    fi
                                 fi
                             fi
                         done
@@ -200,7 +212,6 @@ while [ $salida -eq 0 ]; do
                             1) # Modificar configuración existente para usuarios
 
                                 configuraciones=$(mostrarConfiguracionUsuario)
-                                # Iteramos sobre las configuraciones seleccionadas
                                 for configuracion in $configuraciones; do
                                     modificarConfiguracionHomeUsuario $configuracion
                                 done
@@ -208,7 +219,6 @@ while [ $salida -eq 0 ]; do
                             2) # Modificar configuración existente para grupos
 
                                 configuraciones=$(mostrarConfiguracionGrupo)
-                                # Iteramos sobre las configuraciones seleccionadas
                                 for configuracion in $configuraciones; do
                                     modificarConfiguracionHomeGrupo $configuracion
                                 done
@@ -216,7 +226,6 @@ while [ $salida -eq 0 ]; do
                             3) # Eliminar configuración existente para usuarios
 
                                 configuraciones=$(mostrarConfiguracionUsuario)
-                                # Iteramos sobre las configuraciones seleccionadas
                                 for configuracion in $configuraciones; do
                                     eliminarConfiguracionHomeUsuario $configuracion
                                 done
@@ -224,7 +233,6 @@ while [ $salida -eq 0 ]; do
                             4) # Eliminar configuración existente para grupos
 
                                 configuraciones=$(mostrarConfiguracionGrupo)
-                                # Iteramos sobre las configuraciones seleccionadas
                                 for configuracion in $configuraciones; do
                                     eliminarConfiguracionHomeGrupo $configuracion
                                 done
@@ -249,7 +257,6 @@ while [ $salida -eq 0 ]; do
                             1) # Modificar configuración existente
 
                                 configuraciones=$(mostrarConfiguracionEtc)
-                                # Iteramos sobre las configuraciones seleccionadas
                                 for configuracion in $configuraciones; do
                                     modificarConfiguracionEtc $configuracion
                                 done
@@ -257,7 +264,6 @@ while [ $salida -eq 0 ]; do
                             2) # Eliminar configuración existente
 
                                 configuraciones=$(mostrarConfiguracionEtc)
-                                # Iteramos sobre las configuraciones seleccionadas
                                 for configuracion in $configuraciones; do
                                     eliminarConfiguracionEtc $configuracion
                                 done                                
@@ -311,9 +317,8 @@ while [ $salida -eq 0 ]; do
                                         
                                         usuarios=$(mostrarUsuariosConConfiguracion)
                                         if [ $? -eq 0 ]; then
-                                            # Iteramos sobre los usuarios seleccionados
                                             for usuario in $usuarios; do
-                                                # eval permite expandir el contenido de la variable $usuario antes de ejecutar el comando
+                                                # eval permite expandir el contenido de la variable $usuario antes de ejecutar el comando echo.
                                                 directorio=$(eval echo ~$usuario)
                                                 copia=$(mostrarCopiasSeguridadHome $usuario)
                                                 if [ $? -eq 0 ]; then    
@@ -326,7 +331,6 @@ while [ $salida -eq 0 ]; do
                                         
                                         usuarios=$(mostrarUsuariosConConfiguracion)
                                         if [ $? -eq 0 ]; then
-                                            # Iteramos sobre los usuarios seleccionados                                 
                                             for usuario in $usuarios; do
                                                 if [ $? -eq 0 ]; then
                                                     directorio=$(introducirDirectorioRestauracion)
@@ -359,12 +363,10 @@ while [ $salida -eq 0 ]; do
                                         
                                         grupos=$(mostrarGruposConConfiguracion)
                                         if [ $? -eq 0 ]; then
-                                            # Iteramos sobre los grupos seleccionados
                                             for grupo in $grupos; do
                                                 copiaFecha=$(mostrarCopiasSeguridadHomeGrupos $grupo)
                                                 if [ $? -eq 0 ]; then    
                                                     usuarios=$(extraerUsuarios $grupo)
-                                                    # Iteramos sobre los usuarios de cada grupo
                                                     for usuario in $usuarios; do
                                                         directorio=$(eval echo ~$usuario)
                                                         copiaFechaInvertida=$(invertirFecha $copiaFecha)
@@ -379,13 +381,11 @@ while [ $salida -eq 0 ]; do
                                         
                                         grupos=$(mostrarGruposConConfiguracion)
                                         if [ $? -eq 0 ]; then
-                                            # Iteramos sobre los grupos seleccionados
                                             for grupo in $grupos; do
                                                 copiaFecha=$(mostrarCopiasSeguridadHomeGrupos $grupo)
                                                 if [ $? -eq 0 ]; then
                                                     directorio=$(introducirDirectorioRestauracion)
                                                     usuarios=$(extraerUsuarios $grupo)
-                                                    # Iteramos sobre los usuarios de cada grupo
                                                     for usuario in $usuarios; do
                                                         copiaFechaInvertida=$(invertirFecha $copiaFecha)
                                                         copia=$(ls $backupHome|grep $copiaFechaInvertida|grep $usuario)
@@ -423,7 +423,6 @@ while [ $salida -eq 0 ]; do
                                 
                                 configuraciones=$(mostrarCopiasSeguridadEtc)
                                 if [ $? -eq 0 ]; then
-                                    # Iteramos sobre las configuraciones seleccionadas
                                     for configuracion in $configuraciones; do
                                         directorio=$(echo $configuracion|cut -d- -f4|cut -d. -f1|tr "_" "/")
                                         copia=$configuracion
@@ -435,7 +434,6 @@ while [ $salida -eq 0 ]; do
                                 
                                 configuraciones=$(mostrarCopiasSeguridadEtc)
                                 if [ $? -eq 0 ]; then
-                                    # Iteramos sobre las configuraciones seleccionadas
                                     for configuracion in $configuraciones; do
                                         directorio=$(introducirDirectorioRestauracion)
                                         copia=$configuracion
@@ -481,7 +479,6 @@ while [ $salida -eq 0 ]; do
 
                                 usuarios=$(mostrarUsuariosConConfiguracion)
                                 if [ $? -eq 0 ]; then
-                                    # Iteramos sobre los usuarios seleccionados
                                     for usuario in $usuarios; do
                                         copia=$(mostrarCopiasSeguridadHome $usuario)
                                         if [ $? -eq 0 ]; then
@@ -499,7 +496,6 @@ while [ $salida -eq 0 ]; do
 
                                 grupos=$(mostrarGruposConConfiguracion)
                                 if [ $? -eq 0 ]; then
-                                    # Iteramos sobre los grupos seleccionados
                                     for grupo in $grupos; do
                                         copiaFecha=$(mostrarCopiasSeguridadHomeGrupos $grupo)
                                         if [ $? -eq 0 ]; then
@@ -508,7 +504,6 @@ while [ $salida -eq 0 ]; do
                                             preguntar "$pregunta"
                                             if [ $? -eq 0 ]; then
                                                 usuarios=$(extraerUsuarios $grupo)
-                                                # Iteramos sobre los usuarios de cada grupo
                                                 for usuario in $usuarios; do
                                                     copiaFechaInvertida=$(invertirFecha $copiaFecha)
                                                     copia=$(ls $backupHome|grep $copiaFechaInvertida|grep $usuario)
@@ -533,7 +528,6 @@ while [ $salida -eq 0 ]; do
 
                         copias=$(mostrarCopiasSeguridadEtc)
                         if [ $? -eq 0 ]; then
-                            # Iteramos sobre las copias seleccionadas
                             for copia in $copias; do
                                 eliminarConfiguracionEtc $copia
                                 pregunta=$(echo "¿Desea borrar la copia de seguridad $copia?")

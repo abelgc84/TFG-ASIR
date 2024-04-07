@@ -29,20 +29,9 @@ source funciones.sh
 #
 #############################################################################################################
 
-# Comprobación de los permisos del usuario
-if [ $USER = "root" ]; then
-    permisos="administrador"
-else
-    cat /etc/group|grep sudo|grep $USER>/dev/null
-    if [ $? -eq 0 ]; then
-        permisos="administrador"
-    else
-        permisos="usuario"
-    fi
-fi
-
 while [ $salida -eq 0 ]; do
-    if [ $permisos = "administrador" ]; then
+
+    if [ -n "$1" ] && [ "$1" == "administrador" ]; then
 
         main=$(mostrarMenu "Copia de seguridad para administración" \
             "Opción" "Descripción" \
@@ -576,7 +565,8 @@ while [ $salida -eq 0 ]; do
             salida=1
         fi
     else 
-        error=$(echo "No tiene permisos para ejecutar la aplicación")
+        error=$(echo -e "No se ha podido realizar la comprobación de permisos. \nEjecute backup.sh para utilizar la aplicación.")
         mostrarError "$error"
+        salida=1
     fi
 done

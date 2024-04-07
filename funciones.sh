@@ -640,3 +640,21 @@ restaurarCopiaSeguridadEtcEspecifico () {
     grupo=$(echo $copia | cut -d- -f3)
     sudo chown -R $usuario:$grupo $directorio
 }
+
+#################################################
+# copiaSeguridadCompleta
+# Realiza una copia de seguridad completa de archivos o directorios
+# Parámetros:
+#  $@: Archivos o directorios a copiar
+#################################################
+copiaSeguridadCompleta () {
+    if [ ! -d $backupDestino ]; then
+        mkdir -p $backupDestino
+    fi
+    for fichero in $@; do
+        echo "Fichero: $fichero"
+        shift
+        copia=$(extraerNombre $fichero)
+        tar -czf $backupDestino/$fechaActual-$copia.tar.gz $fichero
+    done
+}

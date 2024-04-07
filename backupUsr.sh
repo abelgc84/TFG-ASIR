@@ -7,6 +7,10 @@
 #############################################################################################################
 
 salida=0
+fechaActual=$(date +"%Y%m%d")
+backupDestino="/backup/$USER"
+configEspejo="$backupDestino/backups-espejo.conf"
+configIncremental="$backupDestino/backups-incremental.conf"
 
 #############################################################################################################
 # 
@@ -48,11 +52,17 @@ while [ $salida -eq 0 ]; do
                     case $menu in
                     1)  # Seleccionar archivos
                         
-                        echo "Seleccionar archivos"
+                        cd $HOME
+                        archivos=$(seleccionarArchivo)
+                        cd ->/dev/null
+                        copiaSeguridadCompleta $archivos
                     ;;
                     2)  # Seleccionar directorios
                         
-                        echo "Seleccionar directorios"
+                        cd $HOME
+                        directorios=$(seleccionarDirectorio)
+                        cd ->/dev/null
+                        copiaSeguridadCompleta $directorios
                     ;;
                     3)  # Salir
                         

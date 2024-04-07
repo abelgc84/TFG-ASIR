@@ -548,7 +548,8 @@ while [ $salida -eq 0 ]; do
             6) # Aplicación para usuarios
 
                 salida=1
-                backupUser.sh
+                permisos="usuario"
+                backupUsr.sh $permisos
             ;;
             7) # Salir
 

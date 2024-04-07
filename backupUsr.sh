@@ -84,7 +84,32 @@ while [ $salida -eq 0 ]; do
                     case $menu in
                     1)  # Crear nueva configuración
                         
-                        echo "Crear nueva configuración"
+                        verificarDirectorioIncremental
+                        cd $HOME
+                        directorios=$(seleccionarDirectorio)
+                        cd ->/dev/null
+                        for directorio in $directorios; do
+                            # Verificamos si el directorio tiene una configuración de copias incrementales
+                            if [ `cat $configIncremental|grep "$directorio:"` ]; then
+                                pregunta=$(echo -e "El directorio $directorio ya tiene una configuración previa. \n¿Desea modificarla?")
+                                preguntar $pregunta
+                                if [ $? -eq 0 ]; then
+                                    echo "Modificar configuración"
+                                else
+                                    echo "No modificar configuración"
+                                fi
+                            else
+                                mostrarMensaje "Introduzca la configuración de copias incrementales para el directorio $directorio"
+                                configuracion=$(configuracionCopiasSeguridad)
+                                if [ $? -eq 0 ]; then
+                                    # Verificamos que la configuración no sea nula
+                                    if [ ! -z "$configuracion" ]; then
+                                        echo "$directorio:$configuracion" >> $configIncremental
+                                    fi
+                                fi
+                            fi                            
+                        done
+
                     ;;
                     2)  # Modificar configuración
                         

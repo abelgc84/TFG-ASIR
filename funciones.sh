@@ -658,3 +658,15 @@ copiaSeguridadCompleta () {
         tar -czf $backupDestino/$fechaActual-$copia.tar.gz $fichero
     done
 }
+
+#################################################
+# verificarDirectorioUsuario
+# Verifica si existe el directorio para las copias de seguridad de los usuarios
+#################################################
+verificarDirectorioIncremental () {
+    if [ ! -d $backupDestino ]; then
+        mkdir -p $backupDestino
+    fi
+}
+
+#################################################

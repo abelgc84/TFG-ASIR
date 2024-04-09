@@ -45,7 +45,8 @@ while [ $salida -eq 0 ]; do
 
         if [ $? -eq 0 ]; then
             case $main in
-            1)  # Configuración de copias de seguridad de los directorios de trabajo
+            1)  
+                # Configuración de copias de seguridad de los directorios de trabajo
                 
                 menu=$(mostrarMenu "Configuración de copias de seguridad de los directorios de trabajo" \
                     "Opción" "Descripción" \
@@ -55,7 +56,8 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1)  # Configuración de copias de seguridad para usuario
+                    1)  
+                        # Configuración de copias de seguridad para usuario
                         
                         usuarios=$(mostrarUsuarios)
                         for usuario in $usuarios; do
@@ -80,7 +82,8 @@ while [ $salida -eq 0 ]; do
                             fi
                         done
                     ;;
-                    2)  # Configuración de copias de seguridad para grupos
+                    2)  
+                        # Configuración de copias de seguridad para grupos
                         
                         grupos=$(mostrarGrupos)                   
                         for grupo in $grupos; do
@@ -108,14 +111,16 @@ while [ $salida -eq 0 ]; do
                             fi
                         done
                     ;;
-                    3)  # Salir
+                    3)  
+                        # Salir
                         
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            2)  # Configuración de copias de seguridad de archivos de configuración
+            2)  
+                # Configuración de copias de seguridad de archivos de configuración
                 
                 menu=$(mostrarMenu "Configuración de copias de seguridad de archivos de configuración" \
                     "Opción" "Descripción" \
@@ -125,7 +130,8 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1)  # Configuración de copias de seguridad para archivos
+                    1)  
+                        # Configuración de copias de seguridad para archivos
                         
                         cd /etc
                         archivos=$(seleccionarArchivo)
@@ -152,7 +158,8 @@ while [ $salida -eq 0 ]; do
                             fi
                         done
                     ;;
-                    2)  # Configuración de copias de seguridad para directorios
+                    2)  
+                        # Configuración de copias de seguridad para directorios
                         
                         cd /etc
                         directorios=$(seleccionarDirectorio)
@@ -180,14 +187,16 @@ while [ $salida -eq 0 ]; do
                             fi
                         done
                     ;;
-                    3)  # Salir
+                    3)  
+                        # Salir
                         
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            3)  # Acceder a la configuración de copias de seguridad
+            3)  
+                # Acceder a la configuración de copias de seguridad
                 
                 menu=$(mostrarMenu "Acceder a la configuración de copias de seguridad" \
                     "Opción" "Descripción" \
@@ -197,7 +206,8 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1)  # Acceder a la configuración de directorios de trabajo
+                    1)  
+                        # Acceder a la configuración de directorios de trabajo
 
                         menu=$(mostrarMenu "Acceder a la configuración de directorios de trabajo" \
                             "Opción" "Descripción" \
@@ -209,42 +219,48 @@ while [ $salida -eq 0 ]; do
 
                         if [ $? -eq 0 ]; then
                             case $menu in
-                            1) # Modificar configuración existente para usuarios
+                            1) 
+                                # Modificar configuración existente para usuarios
 
                                 configuraciones=$(mostrarConfiguracionUsuario)
                                 for configuracion in $configuraciones; do
                                     modificarConfiguracionHomeUsuario $configuracion
                                 done
                             ;;
-                            2) # Modificar configuración existente para grupos
+                            2) 
+                                # Modificar configuración existente para grupos
 
                                 configuraciones=$(mostrarConfiguracionGrupo)
                                 for configuracion in $configuraciones; do
                                     modificarConfiguracionHomeGrupo $configuracion
                                 done
                             ;;
-                            3) # Eliminar configuración existente para usuarios
+                            3) 
+                                # Eliminar configuración existente para usuarios
 
                                 configuraciones=$(mostrarConfiguracionUsuario)
                                 for configuracion in $configuraciones; do
                                     eliminarConfiguracionHomeUsuario $configuracion
                                 done
                             ;;
-                            4) # Eliminar configuración existente para grupos
+                            4) 
+                                # Eliminar configuración existente para grupos
 
                                 configuraciones=$(mostrarConfiguracionGrupo)
                                 for configuracion in $configuraciones; do
                                     eliminarConfiguracionHomeGrupo $configuracion
                                 done
                             ;;
-                            5) # Salir
+                            5) 
+                                # Salir
 
                                 salida=1
                             ;;
                             esac
                         fi    
                     ;;
-                    2)  # Acceder a la configuración de archivos de configuración
+                    2)  
+                        # Acceder a la configuración de archivos de configuración
                         
                         menu=$(mostrarMenu "Acceder a la configuración de archivos de configuración" \
                             "Opción" "Descripción" \
@@ -254,21 +270,24 @@ while [ $salida -eq 0 ]; do
 
                         if [ $? -eq 0 ]; then
                             case $menu in
-                            1) # Modificar configuración existente
+                            1) 
+                                # Modificar configuración existente
 
                                 configuraciones=$(mostrarConfiguracionEtc)
                                 for configuracion in $configuraciones; do
                                     modificarConfiguracionEtc $configuracion
                                 done
                             ;;
-                            2) # Eliminar configuración existente
+                            2) 
+                                # Eliminar configuración existente
 
                                 configuraciones=$(mostrarConfiguracionEtc)
                                 for configuracion in $configuraciones; do
                                     eliminarConfiguracionEtc $configuracion
                                 done                                
                             ;;
-                            3) # Salir
+                            3) 
+                                # Salir
 
                                 salida=1
                             ;;
@@ -276,14 +295,16 @@ while [ $salida -eq 0 ]; do
                         fi
                                  
                     ;;
-                    3)  # Salir
+                    3)  
+                        # Salir
                         
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            4)  # Restaurar copias de seguridad
+            4)  
+                # Restaurar copias de seguridad
                 
                 menu=$(mostrarMenu "Restaurar copias de seguridad" \
                     "Opción" "Descripción" \
@@ -293,7 +314,8 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1)  # Restaurar copias de seguridad de directorios de trabajo
+                    1)  
+                        # Restaurar copias de seguridad de directorios de trabajo
                         
                         menu=$(mostrarMenu "Restaurar copias de seguridad de directorios de trabajo" \
                             "Opción" "Descripción" \
@@ -303,7 +325,8 @@ while [ $salida -eq 0 ]; do
 
                         if [ $? -eq 0 ]; then
                             case $menu in
-                            1)  # Restaurar copias de usuarios
+                            1)  
+                                # Restaurar copias de usuarios
                                 
                                 menu=$(mostrarMenu "Restaurar copias de un usuario" \
                                     "Opción" "Descripción" \
@@ -313,7 +336,8 @@ while [ $salida -eq 0 ]; do
 
                                 if [ $? -eq 0 ]; then
                                     case $menu in
-                                    1)  # Restaurar en el directorio original
+                                    1)  
+                                        # Restaurar en el directorio original
                                         
                                         usuarios=$(mostrarUsuariosConConfiguracion)
                                         if [ $? -eq 0 ]; then
@@ -327,7 +351,8 @@ while [ $salida -eq 0 ]; do
                                             done
                                         fi
                                     ;;
-                                    2)  # Restaurar en un directorio específico
+                                    2)  
+                                        # Restaurar en un directorio específico
                                         
                                         usuarios=$(mostrarUsuariosConConfiguracion)
                                         if [ $? -eq 0 ]; then
@@ -342,14 +367,16 @@ while [ $salida -eq 0 ]; do
                                             done
                                         fi
                                     ;;
-                                    3)  # Salir
+                                    3)  
+                                        # Salir
                                         
                                         salida=1
                                     ;;
                                     esac
                                 fi
                             ;;
-                            2)  # Restaurar copias de grupos
+                            2)  
+                                # Restaurar copias de grupos
                                 
                                 menu=$(mostrarMenu "Restaurar copias de un usuario" \
                                     "Opción" "Descripción" \
@@ -359,7 +386,8 @@ while [ $salida -eq 0 ]; do
 
                                 if [ $? -eq 0 ]; then
                                     case $menu in
-                                    1)  # Restaurar en el directorio original
+                                    1)  
+                                        # Restaurar en el directorio original
                                         
                                         grupos=$(mostrarGruposConConfiguracion)
                                         if [ $? -eq 0 ]; then
@@ -377,7 +405,8 @@ while [ $salida -eq 0 ]; do
                                             done
                                         fi
                                     ;;
-                                    2)  # Restaurar en un directorio específico
+                                    2)  
+                                        # Restaurar en un directorio específico
                                         
                                         grupos=$(mostrarGruposConConfiguracion)
                                         if [ $? -eq 0 ]; then
@@ -395,21 +424,24 @@ while [ $salida -eq 0 ]; do
                                             done
                                         fi
                                     ;;
-                                    3)  # Salir
+                                    3)  
+                                        # Salir
                                         
                                         salida=1
                                     ;;
                                     esac
                                 fi
                             ;;
-                            3)  # Salir
+                            3)  
+                                # Salir
                                 
                                 salida=1
                             ;;
                             esac
                         fi
                     ;;
-                    2)  # Restaurar copias de seguridad de archivos de configuración
+                    2)  
+                        # Restaurar copias de seguridad de archivos de configuración
                         
                         menu=$(mostrarMenu "Restaurar copias de seguridad de archivos de configuración" \
                             "Opción" "Descripción" \
@@ -419,7 +451,8 @@ while [ $salida -eq 0 ]; do
 
                         if [ $? -eq 0 ]; then
                             case $menu in
-                            1)  # Restarurar en el directorio original
+                            1)  
+                                # Restarurar en el directorio original
                                 
                                 configuraciones=$(mostrarCopiasSeguridadEtc)
                                 if [ $? -eq 0 ]; then
@@ -430,7 +463,8 @@ while [ $salida -eq 0 ]; do
                                     done
                                 fi
                             ;;
-                            2)  # Restaurar en un directorio específico
+                            2)  
+                                # Restaurar en un directorio específico
                                 
                                 configuraciones=$(mostrarCopiasSeguridadEtc)
                                 if [ $? -eq 0 ]; then
@@ -441,21 +475,24 @@ while [ $salida -eq 0 ]; do
                                     done
                                 fi
                             ;;
-                            3)  # Salir
+                            3)  
+                                # Salir
                                 
                                 salida=1
                             ;;
                             esac
                         fi
                     ;;
-                    3)  # Salir
+                    3)  
+                        # Salir
                         
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            5) # Borrar copias de seguridad
+            5) 
+                # Borrar copias de seguridad
 
                 menu=$(mostrarMenu "Borrar copias de seguridad" \
                     "Opción" "Descripción" \
@@ -465,7 +502,8 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1) # Borrar copias de seguridad de directorios de trabajo"
+                    1) 
+                        # Borrar copias de seguridad de directorios de trabajo"
 
                         menu=$(mostrarMenu "Borrar copias de seguridad de directorios de trabajo" \
                             "Opción" "Descripción" \
@@ -475,7 +513,8 @@ while [ $salida -eq 0 ]; do
 
                         if [ $? -eq 0 ]; then
                             case $menu in
-                            1) # Borrar copias de seguridad de usuarios
+                            1) 
+                                # Borrar copias de seguridad de usuarios
 
                                 usuarios=$(mostrarUsuariosConConfiguracion)
                                 if [ $? -eq 0 ]; then
@@ -492,7 +531,8 @@ while [ $salida -eq 0 ]; do
                                     done
                                 fi
                             ;;
-                            2) # Borrar copias de seguridad de grupos
+                            2) 
+                                # Borrar copias de seguridad de grupos
 
                                 grupos=$(mostrarGruposConConfiguracion)
                                 if [ $? -eq 0 ]; then
@@ -517,14 +557,16 @@ while [ $salida -eq 0 ]; do
                                     done
                                 fi
                             ;;
-                            3) # Salir
+                            3) 
+                                # Salir
 
                                 salida=1
                             ;;
                             esac
                         fi
                     ;;
-                    2) # Borrar copias de seguridad de archivos de configuración
+                    2) 
+                        # Borrar copias de seguridad de archivos de configuración
 
                         copias=$(mostrarCopiasSeguridadEtc)
                         if [ $? -eq 0 ]; then
@@ -538,20 +580,23 @@ while [ $salida -eq 0 ]; do
                             done
                         fi
                     ;;
-                    3) # Salir
+                    3) 
+                        # Salir
 
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            6) # Aplicación para usuarios
+            6) 
+                # Aplicación para usuarios
 
                 salida=1
                 permisos="usuario"
                 backupUsr.sh $permisos
             ;;
-            7) # Salir
+            7) 
+                # Salir
 
                 salida=1
             ;;

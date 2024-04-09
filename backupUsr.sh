@@ -40,7 +40,8 @@ while [ $salida -eq 0 ]; do
 
         if [ $? -eq 0 ]; then
             case $main in
-            1)  # Realizar copia de seguridad completa
+            1)  
+                # Realizar copia de seguridad completa
                 
                 menu=$(mostrarMenu "Realizar copia de seguridad completa" \
                     "Opción" "Descripción" \
@@ -50,28 +51,32 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1)  # Seleccionar archivos
+                    1)  
+                        # Seleccionar archivos
                         
                         cd $HOME
                         archivos=$(seleccionarArchivo)
                         cd ->/dev/null
                         copiaSeguridadCompleta $archivos
                     ;;
-                    2)  # Seleccionar directorios
+                    2)  
+                        # Seleccionar directorios
                         
                         cd $HOME
                         directorios=$(seleccionarDirectorio)
                         cd ->/dev/null
                         copiaSeguridadCompleta $directorios
                     ;;
-                    3)  # Salir
+                    3)  
+                        # Salir
                         
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            2)  # Configurar copias de seguridad incrementales
+            2)  
+                # Configurar copias de seguridad incrementales
                 
                 menu=$(mostrarMenu "Configurar copias de seguridad incrementales" \
                     "Opción" "Descripción" \
@@ -82,7 +87,8 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1)  # Crear nueva configuración
+                    1)  
+                        # Crear nueva configuración
                         
                         verificarDirectorioIncremental
                         cd $HOME
@@ -100,7 +106,7 @@ while [ $salida -eq 0 ]; do
                                 fi
                             else
                                 mostrarMensaje "Introduzca la configuración de copias incrementales para el directorio $directorio"
-                                configuracion=$(configuracionCopiasSeguridad)
+                                configuracion=$(configurarCopiasSeguridad)
                                 if [ $? -eq 0 ]; then
                                     # Verificamos que la configuración no sea nula
                                     if [ ! -z "$configuracion" ]; then
@@ -111,22 +117,33 @@ while [ $salida -eq 0 ]; do
                         done
 
                     ;;
-                    2)  # Modificar configuración
+                    2)  
+                        # Modificar configuración
                         
-                        echo "Modificar configuración"
+                        configuraciones=$(mostrarConfiguracionIncremental $configIncremental)
+                        for configuracion in $configuraciones; do
+                            modificarConfiguracionIncremental $configuracion
+                        done
                     ;;
-                    3)  # Eliminar configuración
+                    3)  
+                        # Eliminar configuración
                         
-                        echo "Eliminar configuración"
+                        configuraciones=$(mostrarConfiguracionIncremental $configIncremental)
+                        for configuracion in $configuraciones; do
+                            echo "Configuración: $configuracion"
+                            eliminarConfiguracionIncremental $configuracion
+                        done
                     ;;
-                    4)  # Salir
+                    4)  
+                        # Salir
                         
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            3)  # Configurar directorio espejo
+            3)  
+                # Configurar directorio espejo
                 
                 menu=$(mostrarMenu "Configurar directorio espejo" \
                     "Opción" "Descripción" \
@@ -136,22 +153,26 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1)  # Añadir directorio espejo
+                    1)  
+                        # Añadir directorio espejo
                         
                         echo "Añadir directorio espejo"
                     ;;
-                    2)  # Eliminar directorio espejo
+                    2)  
+                        # Eliminar directorio espejo
                         
                         echo "Eliminar directorio espejo"
                     ;;
-                    3)  # Salir
+                    3)  
+                        # Salir
                         
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            4)  # Resturar copias de seguridad
+            4)  
+                # Resturar copias de seguridad
                 
                 menu=$(mostrarMenu "Restaurar copias de seguridad" \
                     "Opción" "Descripción" \
@@ -161,22 +182,26 @@ while [ $salida -eq 0 ]; do
 
                 if [ $? -eq 0 ]; then
                     case $menu in
-                    1)  # Restaurar copias de seguridad completas
+                    1)  
+                        # Restaurar copias de seguridad completas
                         
                         echo "Restaurar copias de seguridad completas"
                     ;;
-                    2)  # Restaurar copias de seguridad incrementales
+                    2)  
+                        # Restaurar copias de seguridad incrementales
                         
                         echo "Restaurar copias de seguridad incrementales"
                     ;;
-                    3)  # Salir
+                    3)  
+                        # Salir
                         
                         salida=1
                     ;;
                     esac
                 fi
             ;;
-            5) # Salir
+            5) 
+                # Salir
             
                 salida=1
             ;;

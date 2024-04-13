@@ -1,5 +1,5 @@
 [Unit]
-Description=Servicio para gestionar las copias de seguridad de archivos de configuración.
+Description=Servicio para gestionar las copias de seguridad de los archivos de configuración.
 After=mount.service
 
 [Service]

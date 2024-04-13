@@ -95,7 +95,7 @@ while [ $salida -eq 0 ]; do
                     2)  
                         # Eliminar directorio espejo
                         
-                        echo "Eliminar directorio espejo"
+                        echo "Eliminar directori espejo"
                     ;;
                     3)  
                         # Salir

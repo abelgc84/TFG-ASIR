@@ -96,7 +96,6 @@ while true; do
 
         # Extraemos la ruta absoluta del directorio home del usuario.
         fichero=$(extraerRuta $usuario)
-#echo "Fichero: $fichero"
         # Contamos el número de copias que hay.
         numCopiasActuales=$(ls $backupDestino|grep $usuario|wc -l)
 
@@ -109,7 +108,6 @@ while true; do
         ultimaCopia=$(ls -t $backupDestino|grep $usuario|head -1)
         fechaUltimaCopia=$(echo $ultimaCopia|cut -d '-' -f 1)
         diasTranscurridos=$((($(date +%s) - $(date -d $fechaUltimaCopia +%s)) / 86400))
-#echo "diasTranscurridos: $diasTranscurridos"
         # Realizamos la copia si han pasado los días indicados.
         if [ $diasTranscurridos -ge $numDias ]; then
             copiaSeguridadCompleta

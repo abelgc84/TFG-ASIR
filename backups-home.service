@@ -1,5 +1,5 @@
 [Unit]
-Description=Servicio para gestionar las copias de seguridad de los directorios home.
+Description=Servicio para gestionar las copias de seguridad de los directorios home de los usuarios o grupos.
 After=mount.service
 
 [Service]

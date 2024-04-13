@@ -2,6 +2,7 @@
 
 # Script para montar un recurso NFS
 
+# Variables
 nfs_server="10.0.2.5:/backup"
 punto_montaje="/backup"
 

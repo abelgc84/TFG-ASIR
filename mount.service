@@ -1,5 +1,5 @@
 [Unit]
-Description=Servicio para montar un recurso NFS
+Description=Servicio para montar el directorio /backups sobre un recurso NFS.
 After=network.target
 
 [Service]

@@ -599,7 +599,7 @@ while [ $salida -eq 0 ]; do
             7)
                 # Consultar registros logs
 
-                echo "Consultar registros logs"
+                echo "Consultar registro logs"
             ;;
             8) 
                 # Salir

@@ -233,6 +233,16 @@ verificarDirectorioConfiguracion () {
 }
 
 #################################################
+# verificarDirectorioUsuario
+# Verifica si existe el directorio /backup/$USER y si no lo crea
+#################################################
+verificarDirectorioUsuario () {
+    if [ ! -d /backup/$USER ]; then
+        mkdir -p /backup/$USER
+    fi
+}
+
+#################################################
 # mostrarConfiguracionUsuario
 # Muestra con Zenity la configuración de copias de seguridad existente de los usuarios
 # Salida:
@@ -660,94 +670,18 @@ copiaSeguridadCompleta () {
 }
 
 #################################################
-# verificarDirectorioUsuario
-# Verifica si existe el directorio para las copias de seguridad de los usuarios
-#################################################
-verificarDirectorioIncremental () {
-    if [ ! -d $backupDestino ]; then
-        mkdir -p $backupDestino
-    fi
-}
-
-#################################################
-# mostrarConfiguracionIncremental
-# Muestra la configuración de copias de seguridad incrementales
-# Salida:
-#  Configuración de copias de seguridad incrementales
-#################################################
-mostrarConfiguracionIncremental () {
-    zenity --list \
-        --title="Configuración de copias de seguridad" \
-        --width="600" \
-        --height="500" \
-        --multiple \
-        --separator=" " \
-        --column="Archivo" \
-        --column="Número de copias" \
-        --column="Número de días" \
-        $(awk -F: '{print $1, $2, $3}' $configIncremental)
-}
-
-#################################################
-# modificarConfiguracionIncremental
-# Modifica la configuración de copias de seguridad incrementales
+# anadirDirectorioEspejo
+# Añade un directorio espejo a la configuración
 # Parámetros:
-#  $1: Configuracion a modificar
+#  $1: Directorio a añadir
 #################################################
-modificarConfiguracionIncremental () {
-    configuracion=$(cat $configIncremental|grep $1:)
-    archivo=$(echo $configuracion | cut -d: -f1)
-    mensaje=$(echo "Introduzca la configuración de copias de seguridad para el archivo $archivo")
-    mostrarMensaje "$mensaje"
-    salidaConfig=0
-    while [ $salidaConfig -eq 0 ]; do
-        nuevaConfiguracion=$(zenity --forms \
-            --title="Modificar configuración de copias de seguridad" \
-            --text="Introduce los nuevos datos para la configuración de copias de seguridad" \
-            --width="600" \
-            --separator=":" \
-            --add-entry="Número de copias a mantener" \
-            --add-entry="Número de días entre copias de seguridad")
-        
-        if [ $? -eq 0 ]; then 
-
-            numCopias=$(echo $nuevaConfiguracion | cut -d: -f1)
-            numDias=$(echo $nuevaConfiguracion | cut -d: -f2)
-        
-            # Verificamos que numCopias y numDias sean números enteros positivos
-            # Se compara con la expresión regular (=~) ^[0-9]+$ que indica que la cadena comienza (^) y termina ($) con un número
-            if ! [[ $numCopias =~ ^[0-9]+$ ]] || ! [[ $numDias =~ ^[0-9]+$ ]]; then
-                error=$(echo -e "Los valores introducidos no son correctos.\nDebe introducir números enteros positivos.")
-                mostrarError "$error"
-            else
-                nuevaConfiguracion="$archivo:$nuevaConfiguracion"
-                # Modificamos la configuración en el archivo de configuración
-                # El delimitador de sed es el caracter | para evitar conflictos con las barras de la ruta del archivo
-                sed -i "s|$configuracion|$nuevaConfiguracion|" $configIncremental
-                salidaConfig=1
-            fi
-        else
-            salidaConfig=1
-        fi    
-    done
-}
-
-#################################################
-# eliminarConfiguracionIncremental
-# Elimina la configuración de copias de seguridad incrementales
-# Parámetros:
-#  $1: Configuración a eliminar
-#################################################
-eliminarConfiguracionIncremental () {
-    configuracion=$(cat $configIncremental|grep $1:)
-    archivo=$(echo $configuracion | cut -d: -f1)
-    # Eliminamos la configuración en el archivo de configuración
-    pregunta=$(echo "¿Desea eliminar la configuración de copias de seguridad para el archivo $archivo?")
-    preguntar "$pregunta"
-    if [ $? -eq 0 ]; then
-        # Escapamos los caracteres especiales de la configuración para que sed no los interprete
-        # sed 's/[^-A-Za-z0-9_]/\\&/g') - Indica que se reemplazan todos los caracteres que no sean letras, números o guiones por el mismo caracter escapado (\)
-        configuracionEscapada=$(echo $configuracion | sed 's/[^-A-Za-z0-9_]/\\&/g')
-        sed -i "/$configuracionEscapada/d" $configIncremental
+anadirDirectorioEspejo () {
+    directorio=$1
+    if [ ! -d $directorio ]; then
+        error=$(echo -e "El directorio $directorio no existe.\nDebe seleccionar un directorio válido.")
+        mostrarError "$error"
+    else
+        verificarDirectorioUsuario
+        echo $directorio >> $configEspejo
     fi
 }

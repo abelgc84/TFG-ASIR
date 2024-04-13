@@ -41,7 +41,8 @@ while [ $salida -eq 0 ]; do
             "4" "Restaurar copias de seguridad" \
             "5" "Borrar copias de seguridad" \
             "6" "Aplicación para usuarios" \
-            "7" "Salir")
+            "7" "Consultar registros logs" \
+            "8" "Salir")
 
         if [ $? -eq 0 ]; then
             case $main in
@@ -595,7 +596,12 @@ while [ $salida -eq 0 ]; do
                 permisos="usuario"
                 backupUsr.sh $permisos
             ;;
-            7) 
+            7)
+                # Consultar registros logs
+
+                echo "Consultar registros logs"
+            ;;
+            8) 
                 # Salir
 
                 salida=1

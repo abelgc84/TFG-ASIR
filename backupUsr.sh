@@ -10,7 +10,6 @@ salida=0
 fechaActual=$(date +"%Y%m%d")
 backupDestino="/backup/$USER"
 configEspejo="$backupDestino/backups-espejo.conf"
-configIncremental="$backupDestino/backups-incremental.conf"
 
 #############################################################################################################
 # 
@@ -33,10 +32,9 @@ while [ $salida -eq 0 ]; do
         main=$(mostrarMenu "Copia de seguridad para usuarios" \
             "Opción" "Descripción" \
             "1" "Realizar copia de seguridad completa" \
-            "2" "Configurar copias de seguridad incrementales" \
-            "3" "Configurar directorio espejo" \
-            "4" "Restaurar copias de seguridad" \
-            "5" "Salir")
+            "2" "Configurar directorio espejo" \
+            "3" "Restaurar copias de seguridad" \
+            "4" "Salir")
 
         if [ $? -eq 0 ]; then
             case $main in
@@ -74,75 +72,8 @@ while [ $salida -eq 0 ]; do
                     ;;
                     esac
                 fi
-            ;;
+            ;;            
             2)  
-                # Configurar copias de seguridad incrementales
-                
-                menu=$(mostrarMenu "Configurar copias de seguridad incrementales" \
-                    "Opción" "Descripción" \
-                    "1" "Crear nueva configuración" \
-                    "2" "Modificar configuración" \
-                    "3" "Eliminar configuración" \
-                    "4" "Salir")
-
-                if [ $? -eq 0 ]; then
-                    case $menu in
-                    1)  
-                        # Crear nueva configuración
-                        
-                        verificarDirectorioIncremental
-                        cd $HOME
-                        directorios=$(seleccionarDirectorio)
-                        cd ->/dev/null
-                        for directorio in $directorios; do
-                            # Verificamos si el directorio tiene una configuración de copias incrementales
-                            if [ `cat $configIncremental|grep "$directorio:"` ]; then
-                                pregunta=$(echo -e "El directorio $directorio ya tiene una configuración previa. \n¿Desea modificarla?")
-                                preguntar $pregunta
-                                if [ $? -eq 0 ]; then
-                                    echo "Modificar configuración"
-                                else
-                                    echo "No modificar configuración"
-                                fi
-                            else
-                                mostrarMensaje "Introduzca la configuración de copias incrementales para el directorio $directorio"
-                                configuracion=$(configurarCopiasSeguridad)
-                                if [ $? -eq 0 ]; then
-                                    # Verificamos que la configuración no sea nula
-                                    if [ ! -z "$configuracion" ]; then
-                                        echo "$directorio:$configuracion" >> $configIncremental
-                                    fi
-                                fi
-                            fi                            
-                        done
-
-                    ;;
-                    2)  
-                        # Modificar configuración
-                        
-                        configuraciones=$(mostrarConfiguracionIncremental $configIncremental)
-                        for configuracion in $configuraciones; do
-                            modificarConfiguracionIncremental $configuracion
-                        done
-                    ;;
-                    3)  
-                        # Eliminar configuración
-                        
-                        configuraciones=$(mostrarConfiguracionIncremental $configIncremental)
-                        for configuracion in $configuraciones; do
-                            echo "Configuración: $configuracion"
-                            eliminarConfiguracionIncremental $configuracion
-                        done
-                    ;;
-                    4)  
-                        # Salir
-                        
-                        salida=1
-                    ;;
-                    esac
-                fi
-            ;;
-            3)  
                 # Configurar directorio espejo
                 
                 menu=$(mostrarMenu "Configurar directorio espejo" \
@@ -156,7 +87,10 @@ while [ $salida -eq 0 ]; do
                     1)  
                         # Añadir directorio espejo
                         
-                        echo "Añadir directorio espejo"
+                        cd $HOME
+                        directorio=$(seleccionarDirectorio)
+                        cd ->/dev/null
+                        anadirDirectorioEspejo $directorio
                     ;;
                     2)  
                         # Eliminar directorio espejo
@@ -171,7 +105,7 @@ while [ $salida -eq 0 ]; do
                     esac
                 fi
             ;;
-            4)  
+            3)  
                 # Resturar copias de seguridad
                 
                 menu=$(mostrarMenu "Restaurar copias de seguridad" \
@@ -200,7 +134,7 @@ while [ $salida -eq 0 ]; do
                     esac
                 fi
             ;;
-            5) 
+            4) 
                 # Salir
             
                 salida=1

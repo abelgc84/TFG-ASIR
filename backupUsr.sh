@@ -9,7 +9,7 @@
 salida=0
 fechaActual=$(date +"%Y%m%d")
 backupDestino="/backup/$USER"
-configEspejo="$backupDestino/backups-espejo.conf"
+configEspejo="/backup/config/backups-espejo.conf"
 
 #############################################################################################################
 # 

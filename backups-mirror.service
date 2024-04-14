@@ -1,0 +1,9 @@
+[Unit]
+Description=Servicio para gestionar las copias espejo.
+After=mount.service
+
+[Service]
+ExecStart=/home/abel/bin/backups-mirror.sh
+
+[Install]
+WantedBy=multi-user.target

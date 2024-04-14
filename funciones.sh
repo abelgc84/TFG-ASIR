@@ -682,7 +682,8 @@ anadirDirectorioEspejo () {
         mostrarError "$error"
     else
         verificarDirectorioUsuario
-        echo $directorio >> $configEspejo
+        configuracion="$USER:$directorio"
+        echo $configuracion >> $configEspejo
     fi
 }
 

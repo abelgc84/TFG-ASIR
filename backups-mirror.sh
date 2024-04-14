@@ -7,8 +7,7 @@
 #############################################################################################################
 
 fechaActual=$(date +"%Y%m%d")
-backupDestino="/backup/$USER"
-configEspejo="$backupDestino/backups-espejo.conf"
+configEspejo="/backup/config/backups-espejo.conf"
 
 #############################################################################################################
 #
@@ -31,42 +30,38 @@ extraerNombre () {
 }
 
 #################################################
-# verificarDirectorioMirror
-# Verifica si el directorio espejo existe, si no existe lo crea
-# Parámetros:
-#   $1: Nombre del directorio
-#################################################
-verificarDirectorioMirror () {
-    if [ ! -d "$backupDestino/$1" ]; then
-        mkdir -p "$backupDestino/$1"
-    fi
-}
-
-#################################################
 # recorrerDirectorio
 # Recorre un directorio y crea una copia espejo de los archivos y directorios
 # Parámetros:
 #   $1: Directorio a recorrer
+#   $2: Directorio espejo o subdirectorios del directorio espejo en caso de recursividad
 #################################################
 recorrerDirectorio () {
     for fichero in $1/*; do
 
-        if [ -f "$fichero" ]; then
+        if [ -f "$fichero" ]; then    
             # Dividimos la ruta en partes tomando como separador (-F) el directorio espejo
-            archivo=$(echo $fichero|awk -F"$directorio/" '{print $2}')
-            if [ ! -f "$backupDestino/$directorio/$archivo" ]; then
-                cp $fichero $backupDestino/$directorio
-                echo "$fichero $backupDestino/$directorio">>$HOME/backup.log
+            archivo=$(echo $fichero|awk -F"$2/" '{print $2}')
+            if [ ! -f "$backupDestino/$2/$archivo" ]; then
+                cp $fichero $backupDestino/$2
+                copia=$(extraerNombre $fichero)
+                chown $usuario:$usuario $backupDestino/$2/$copia
             else
-                diff $fichero $backupDestino/$directorio/$archivo
+                diff $fichero $backupDestino/$2/$archivo
                 if [ $? -ne 0 ]; then
-                    cp $fichero $backupDestino/$directorio
-                    echo "$fichero $backupDestino/$directorio">>$HOME/backup.log
+                    copia=$(extraerNombre $fichero)
+                    cp $fichero $backupDestino/$copia
                 fi
             fi
         elif [ -d "$fichero" ]; then
-            echo "directorio: $fichero"
-            recorrerDirectorio $fichero
+            subdirectorio=$(extraerNombre $fichero)
+            if [ ! -d "$backupDestino/$2/$(extraerNombre $fichero)" ]; then
+                mkdir -p "$backupDestino/$2/$(extraerNombre $fichero)"
+                chown $usuario:$usuario "$backupDestino/$2/$(extraerNombre $fichero)"
+                recorrerDirectorio $fichero "$2/$subdirectorio"
+            else
+                recorrerDirectorio $fichero "$2/$subdirectorio"
+            fi
         fi
 
     done
@@ -78,12 +73,20 @@ recorrerDirectorio () {
 #
 #############################################################################################################
 
-# while true; do
+while true; do
 
-    while read -r linea; do
-        directorio=$(extraerNombre $linea)
-        verificarDirectorioMirror $directorio
-        recorrerDirectorio $linea
+    while IFS=: read -r usuario ruta; do
+echo "usuario: $usuario"
+        backupDestino="/backup/$usuario"
+echo "backupDestino: $backupDestino"
+        directorio=$(extraerNombre $ruta)
+        # Verificamos si el directorio espejo existe, si no existe lo creamos
+        if [ ! -d "$backupDestino/$directorio" ]; then
+            mkdir -p "$backupDestino/$directorio"
+            chown $usuario:$usuario "$backupDestino/$directorio"
+        fi
+        recorrerDirectorio $ruta $directorio
+
     done<$configEspejo
 
-# done
+done

@@ -95,7 +95,10 @@ while [ $salida -eq 0 ]; do
                     2)  
                         # Eliminar directorio espejo
                         
-                        echo "Eliminar directori espejo"
+                        directorio=$(mostrarDirectoriosEspejo)
+                        if [ $? -eq 0 ]; then
+                            eliminarDirectorioEspejo $directorio
+                        fi
                     ;;
                     3)  
                         # Salir
@@ -108,30 +111,9 @@ while [ $salida -eq 0 ]; do
             3)  
                 # Resturar copias de seguridad
                 
-                menu=$(mostrarMenu "Restaurar copias de seguridad" \
-                    "Opción" "Descripción" \
-                    "1" "Restaurar copias de seguridad completas" \
-                    "2" "Restaurar copias de seguridad incrementales" \
-                    "3" "Salir")
-
+                copia=$(mostrarCopiasSeguridadCompleta)
                 if [ $? -eq 0 ]; then
-                    case $menu in
-                    1)  
-                        # Restaurar copias de seguridad completas
-                        
-                        echo "Restaurar copias de seguridad completas"
-                    ;;
-                    2)  
-                        # Restaurar copias de seguridad incrementales
-                        
-                        echo "Restaurar copias de seguridad incrementales"
-                    ;;
-                    3)  
-                        # Salir
-                        
-                        salida=1
-                    ;;
-                    esac
+                    restaurarCopiaSeguridadCompleta $copia
                 fi
             ;;
             4) 

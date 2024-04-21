@@ -89,8 +89,6 @@ seleccionarArchivo () {
 seleccionarDirectorio () {
     zenity --title="Selecciona un directorio" \
         --file-selection \
-        --multiple \
-        --separator=" " \
         --directory
 }
 
@@ -676,15 +674,80 @@ copiaSeguridadCompleta () {
 #  $1: Directorio a añadir
 #################################################
 anadirDirectorioEspejo () {
-    directorio=$1
     if [ ! -d $directorio ]; then
         error=$(echo -e "El directorio $directorio no existe.\nDebe seleccionar un directorio válido.")
         mostrarError "$error"
     else
         verificarDirectorioUsuario
         configuracion="$USER:$directorio"
-        echo $configuracion >> $configEspejo
+        if [ ! -z $directorio ]; then
+            echo $configuracion >> $configEspejo
+        fi
     fi
 }
 
 #################################################
+# eliminarDirectorioEspejo
+# Elimina un directorio espejo de la configuración
+# Parámetros:
+#  $1: Directorio a eliminar
+#################################################
+eliminarDirectorioEspejo () {
+    if [ ! -d $directorio ]; then
+        error=$(echo -e "El directorio $directorio no existe.\nDebe seleccionar un directorio válido.")
+        mostrarError "$error"
+    else
+        pregunta=$(echo "¿Desea eliminar el directorio espejo $directorio?")
+        preguntar "$pregunta"
+        if [ $? -eq 0 ]; then
+            directorioEscapado=$(echo $directorio | sed 's/[^-A-Za-z0-9_]/\\&/g')
+            sed -i "/$directorioEscapado/d" $configEspejo
+            directorioBackup=$(echo $directorio | sed 's/home/backup/')
+            if [ -d $directorioBackup ]; then
+                sudo rm -r $directorioBackup
+            fi
+        fi
+    fi
+}
+
+#################################################
+# mostrarDirectoriosEspejo
+# Muestra los directorios espejo con Zenity
+# Salida:
+#  Directorios espejo seleccionados separados por espacios
+#################################################
+mostrarDirectoriosEspejo () {
+    zenity --list \
+        --title="Directorios espejo" \
+        --width="600" \
+        --height="500" \
+        --multiple \
+        --separator=" " \
+        --column="Directorio" \
+        $(awk -F: '{print $2}' $configEspejo)
+}
+
+#################################################
+# mostrarCopiasSeguridadCompleta
+# Muestra las copias de seguridad completas existentes con Zenity
+# Salida:
+#  Copia de seguridad seleccionada
+#################################################
+mostrarCopiasSeguridadCompleta () {
+    zenity --list \
+        --title="Copias de seguridad completas" \
+        --width="600" \
+        --height="500" \
+        --column="Copia de seguridad" \
+        $(ls -1 $backupDestino|grep .tar.gz)
+}
+
+#################################################
+# restaurarCopiaSeguridadCompleta
+# Restaura una copia de seguridad completa
+# Parámetros:
+#  $1: Copia de seguridad
+#################################################
+restaurarCopiaSeguridadCompleta () {
+    tar -xzf $backupDestino/$1 -C /
+}

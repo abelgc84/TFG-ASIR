@@ -106,6 +106,10 @@ while true; do
 
         backupDestino="/backup/$usuario"
         directorio=$(extraerNombre $ruta)
+        if [ ! -d "$backupDestino" ]; then
+            mkdir -p "$backupDestino"
+            chown $usuario:$usuario "$backupDestino"
+        fi
         # Verificamos si el directorio espejo existe, si no existe lo creamos
         if [ ! -d "$backupDestino/$directorio" ]; then
             mkdir -p "$backupDestino/$directorio"

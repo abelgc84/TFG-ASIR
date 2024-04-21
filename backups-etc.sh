@@ -55,7 +55,8 @@ copiaSeguridadCompleta () {
 eliminarCopiasAntiguas () {
     numCopiasActuales=$(ls $backupDestino|grep $nombreFichero| wc -l)
     if [ $numCopiasActuales -gt $numCopias ]; then
-        ls -t $backupDestino|grep $nombreFichero|tail -1|rm
+        copiaEliminar=$(ls -t $backupDestino|grep $nombreFichero|tail -1)
+        rm -f $backupDestino/$copiaEliminar
     fi 
 }
 

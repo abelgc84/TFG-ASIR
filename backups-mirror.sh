@@ -67,6 +67,33 @@ recorrerDirectorio () {
     done
 }
 
+#################################################
+# recorrerEspejo
+# Recorre el directorio espejo y comprueba que los archivos y directorios existan en el directorio original
+# Parámetros:
+#   $1: Directorio espejo  
+#   $2: Directorio original o subdirectorios del directorio original en caso de recursividad
+#################################################
+recorrerEspejo () {
+    for fichero in $1/*; do
+
+        if [ -f "$fichero" ]; then
+            archivo=$(extraerNombre $fichero)
+            if [ ! -f "$2/$archivo" ]; then
+                rm -f $fichero
+            fi
+        elif [ -d "$fichero" ]; then
+            directorio=$(extraerNombre $fichero)
+            if [ ! -d "$2/$directorio" ]; then
+                rm -rf $fichero
+            else
+                recorrerEspejo $fichero $2/$directorio
+            fi
+        fi
+
+    done
+}
+
 #############################################################################################################
 #
 # Cuerpo del script.
@@ -76,9 +103,8 @@ recorrerDirectorio () {
 while true; do
 
     while IFS=: read -r usuario ruta; do
-echo "usuario: $usuario"
+
         backupDestino="/backup/$usuario"
-echo "backupDestino: $backupDestino"
         directorio=$(extraerNombre $ruta)
         # Verificamos si el directorio espejo existe, si no existe lo creamos
         if [ ! -d "$backupDestino/$directorio" ]; then
@@ -86,6 +112,7 @@ echo "backupDestino: $backupDestino"
             chown $usuario:$usuario "$backupDestino/$directorio"
         fi
         recorrerDirectorio $ruta $directorio
+        recorrerEspejo $backupDestino/$directorio $ruta
 
     done<$configEspejo
 

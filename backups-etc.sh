@@ -43,7 +43,8 @@ copiaSeguridadCompleta () {
     grupo=$(stat -c "%G" $fichero)
     nombre=$nombreFichero
     destino="$backupDestino/$fechaActual-$usuario-$grupo-$nombre"
-    sudo tar -czf "$destino".tar.gz $fichero
+    tar -czf "$destino".tar.gz $fichero
+    echo "CopiaRealizada:$destino" >> /backup/config/backups-etc.log
 }
 
 #################################################
@@ -57,6 +58,7 @@ eliminarCopiasAntiguas () {
     if [ $numCopiasActuales -gt $numCopias ]; then
         copiaEliminar=$(ls -t $backupDestino|grep $nombreFichero|tail -1)
         rm -f $backupDestino/$copiaEliminar
+        echo "CopiaEliminada:$copiaEliminar" >> /backup/config/backups-etc.log
     fi 
 }
 

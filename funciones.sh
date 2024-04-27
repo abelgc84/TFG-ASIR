@@ -84,7 +84,7 @@ seleccionarArchivo () {
 # seleccionarDirectorio
 # Muestra una ventana de selección de directorios con Zenity
 # Salida:
-#   Lista de directorios seleccionados separados por espacios
+#   Directorio seleccionado
 #################################################
 seleccionarDirectorio () {
     zenity --title="Selecciona un directorio" \
@@ -664,6 +664,7 @@ copiaSeguridadCompleta () {
         shift
         copia=$(extraerNombre $fichero)
         tar -czf $backupDestino/$fechaActual-$copia.tar.gz $fichero
+        echo "Copia:$fechaActual:$USER:$copia.tar.gz" >> /backup/config/backups-completos.log
     done
 }
 
@@ -750,4 +751,5 @@ mostrarCopiasSeguridadCompleta () {
 #################################################
 restaurarCopiaSeguridadCompleta () {
     tar -xzf $backupDestino/$1 -C /
+    echo "Restaurar:$USER:$backupDestino/$1" >> /backup/config/backups-completos.log
 }

@@ -1,0 +1,9 @@
+[Unit]
+Description=Servicio para montar el directorio /backups sobre un recurso NFS.
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/mount.sh
+
+[Install]
+WantedBy=multi-user.target

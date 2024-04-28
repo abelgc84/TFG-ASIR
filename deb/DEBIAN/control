@@ -1,0 +1,9 @@
+Package: BACKUPSH
+Priority: optional
+Section: misc
+Maintainer: AbelGC
+Architecture: all
+Version: 1.0
+Depends:
+Description: Herramienta de gestión de copias de seguridad
+ Contiene scripts y servicios para la gestión de copias de seguridad.

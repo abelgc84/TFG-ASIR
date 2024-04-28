@@ -1,0 +1,9 @@
+[Unit]
+Description=Servicio para gestionar las copias de seguridad de los directorios home de los usuarios o grupos.
+After=mount.service
+
+[Service]
+ExecStart=/usr/bin/backups-home.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -664,7 +664,7 @@ copiaSeguridadCompleta () {
         shift
         copia=$(extraerNombre $fichero)
         tar -czf $backupDestino/$fechaActual-$copia.tar.gz $fichero
-        echo "Copia:$fechaActual:$USER:$copia.tar.gz" >> /backup/config/backups-completos.log
+        echo "$(date "+%Y %b %d %H:%M:%S") Copia: $fechaActual:$USER:$copia.tar.gz" >> /backup/config/backups-completos.log
     done
 }
 
@@ -751,5 +751,5 @@ mostrarCopiasSeguridadCompleta () {
 #################################################
 restaurarCopiaSeguridadCompleta () {
     tar -xzf $backupDestino/$1 -C /
-    echo "Restaurar:$USER:$backupDestino/$1" >> /backup/config/backups-completos.log
+    echo "$(date "+%Y %b %d %H:%M:%S") Restaurar: $USER:$backupDestino/$1" >> /backup/config/backups-completos.log
 }

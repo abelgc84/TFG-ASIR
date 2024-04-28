@@ -16,6 +16,16 @@ configEspejo="/backup/config/backups-espejo.conf"
 #############################################################################################################
 
 #################################################
+# eliminarLineasBlanco
+# Función para eliminar las líneas en blanco del fichero de configuración.
+# Parámetros:
+#   $1: Fichero de configuración.
+#################################################
+eliminarLineasBlanco() {
+    sed -i '/^$/d' "$1"
+}
+
+#################################################
 # extraerNombre
 # Extrae el nombre de un archivo o directorio de una ruta absoluta
 # Parámetros:
@@ -44,7 +54,7 @@ recorrerDirectorio () {
             archivo=$(echo $fichero|awk -F"$2/" '{print $2}')
             if [ ! -f "$backupDestino/$2/$archivo" ]; then
                 cp $fichero $backupDestino/$2
-                echo "Copiado:$backupDestino/$2/$archivo" >> /backup/config/backups-espejo.log
+                echo "$(date "+%Y %b %d %H:%M:%S") Copiado: $2/$archivo" >> /backup/config/backups-espejo.log
                 copia=$(extraerNombre $fichero)
                 chown $usuario:$usuario $backupDestino/$2/$copia
             else
@@ -52,14 +62,14 @@ recorrerDirectorio () {
                 if [ $? -ne 0 ]; then
                     copia=$(extraerNombre $fichero)
                     cp $fichero $backupDestino/$copia
-                    echo "Copiado:$backupDestino/$2/$archivo" >> /backup/config/backups-espejo.log
+                    echo "$(date "+%Y %b %d %H:%M:%S") Copiado: $2/$archivo" >> /backup/config/backups-espejo.log
                 fi
             fi
         elif [ -d "$fichero" ]; then
             subdirectorio=$(extraerNombre $fichero)
             if [ ! -d "$backupDestino/$2/$(extraerNombre $fichero)" ]; then
                 mkdir -p "$backupDestino/$2/$(extraerNombre $fichero)"
-                echo "Creado:$backupDestino/$2/$(extraerNombre $fichero)" >> /backup/config/backups-espejo.log
+                echo "$(date "+%Y %b %d %H:%M:%S") Creado: $2/$(extraerNombre $fichero)" >> /backup/config/backups-espejo.log
                 chown $usuario:$usuario "$backupDestino/$2/$(extraerNombre $fichero)"
                 recorrerDirectorio $fichero "$2/$subdirectorio"
             else
@@ -84,13 +94,13 @@ recorrerEspejo () {
             archivo=$(extraerNombre $fichero)
             if [ ! -f "$2/$archivo" ]; then
                 rm -f $fichero
-                echo "Eliminado:$fichero" >> /backup/config/backups-espejo.log
+                echo "$(date "+%Y %b %d %H:%M:%S") Eliminado: $fichero" >> /backup/config/backups-espejo.log
             fi
         elif [ -d "$fichero" ]; then
             directorio=$(extraerNombre $fichero)
             if [ ! -d "$2/$directorio" ]; then
                 rm -rf $fichero
-                echo "Eliminado:$fichero" >> /backup/config/backups-espejo.log
+                echo "$(date "+%Y %b %d %H:%M:%S") Eliminado: $fichero" >> /backup/config/backups-espejo.log
             else
                 recorrerEspejo $fichero $2/$directorio
             fi
@@ -107,19 +117,22 @@ recorrerEspejo () {
 
 while true; do
 
+    # Eliminamos las líneas en blanco del fichero de configuración.
+    eliminarLineasBlanco $configEspejo
+
     while IFS=: read -r usuario ruta; do
 
         backupDestino="/backup/$usuario"
         directorio=$(extraerNombre $ruta)
         if [ ! -d "$backupDestino" ]; then
             mkdir -p "$backupDestino"
-            echo "Creado:$backupDestino" >> /backup/config/backups-espejo.log
+            echo "$(date "+%Y %b %d %H:%M:%S") Creado: $backupDestino" >> /backup/config/backups-espejo.log
             chown $usuario:$usuario "$backupDestino"
         fi
         # Verificamos si el directorio espejo existe, si no existe lo creamos
         if [ ! -d "$backupDestino/$directorio" ]; then
             mkdir -p "$backupDestino/$directorio"
-            echo "Creado:$backupDestino/$directorio" >> /backup/config/backups-espejo.log
+            echo "$(date "+%Y %b %d %H:%M:%S") Creado: $backupDestino/$directorio" >> /backup/config/backups-espejo.log
             chown $usuario:$usuario "$backupDestino/$directorio"
         fi
         recorrerDirectorio $ruta $directorio

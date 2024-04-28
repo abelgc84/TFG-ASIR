@@ -62,7 +62,7 @@ copiaSeguridadCompleta () {
     nombre=home
     destino="$backupDestino/$fechaActual-$usuario-$grupo-$nombre"
     tar -czf "$destino".tar.gz $fichero
-    echo "CopiaRealizada:$fechaActual-$usuario-$grupo-$nombre" >> /backup/config/backups-home.log
+    echo "$(date "+%Y %b %d %H:%M:%S") Copia Realizada: $fechaActual-$usuario-$grupo-$nombre" >> /backup/config/backups-home.log
 }
 #################################################
 # eliminarCopiasAntiguas
@@ -73,7 +73,7 @@ eliminarCopiasAntiguas () {
         if [ $numCopiasActuales -gt $numCopias ]; then
             copiaEliminar=$(ls -t $backupDestino|grep $usuario|tail -1)
             rm -f $backupDestino/$copiaEliminar
-            echo "CopiaEliminada:$copiaEliminar" >> /backup/config/backups-home.log
+            echo "$(date "+%Y %b %d %H:%M:%S") Copia Eliminada: $copiaEliminar" >> /backup/config/backups-home.log
         fi
 }
 

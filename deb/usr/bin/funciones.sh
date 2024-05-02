@@ -675,13 +675,13 @@ copiaSeguridadCompleta () {
 #  $1: Directorio a añadir
 #################################################
 anadirDirectorioEspejo () {
-    if [ ! -d $directorio ]; then
-        error=$(echo -e "El directorio $directorio no existe.\nDebe seleccionar un directorio válido.")
+    if [ ! -d $1 ]; then
+        error=$(echo -e "El directorio $1 no existe.\nDebe seleccionar un directorio válido.")
         mostrarError "$error"
     else
         verificarDirectorioUsuario
-        configuracion="$USER:$directorio"
-        if [ ! -z $directorio ]; then
+        configuracion="$USER:$1"
+        if [ ! -z $1 ]; then
             echo $configuracion >> $configEspejo
         fi
     fi
@@ -694,16 +694,16 @@ anadirDirectorioEspejo () {
 #  $1: Directorio a eliminar
 #################################################
 eliminarDirectorioEspejo () {
-    if [ ! -d $directorio ]; then
-        error=$(echo -e "El directorio $directorio no existe.\nDebe seleccionar un directorio válido.")
+    if [ ! -d $1 ]; then
+        error=$(echo -e "El directorio $1 no existe.\nDebe seleccionar un directorio válido.")
         mostrarError "$error"
     else
-        pregunta=$(echo "¿Desea eliminar el directorio espejo $directorio?")
+        pregunta=$(echo "¿Desea eliminar el directorio espejo $1?")
         preguntar "$pregunta"
         if [ $? -eq 0 ]; then
-            directorioEscapado=$(echo $directorio | sed 's/[^-A-Za-z0-9_]/\\&/g')
+            directorioEscapado=$(echo $1 | sed 's/[^-A-Za-z0-9_]/\\&/g')
             sed -i "/$directorioEscapado/d" $configEspejo
-            directorioBackup=$(echo $directorio | sed 's/home/backup/')
+            directorioBackup=$(echo $1 | sed 's/home/backup/')
             if [ -d $directorioBackup ]; then
                 sudo rm -r $directorioBackup
             fi
@@ -752,4 +752,18 @@ mostrarCopiasSeguridadCompleta () {
 restaurarCopiaSeguridadCompleta () {
     tar -xzf $backupDestino/$1 -C /
     echo "$(date "+%Y %b %d %H:%M:%S") Restaurar: $USER:$backupDestino/$1" >> /backup/config/backups-completos.log
+}
+
+#################################################
+# mostrarLog
+# Muestra el log de copias de seguridad con Zenity
+# Parámetros:
+#  $1: Log a mostrar
+#################################################
+mostrarLogs () {
+    zenity --text-info \
+        --title="Log de copias de seguridad" \
+        --width="600" \
+        --height="500" \
+        --filename=$1
 }

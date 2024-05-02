@@ -599,7 +599,37 @@ while [ $salida -eq 0 ]; do
             7)
                 # Consultar registros logs
 
-                echo "Consultar registro logs"
+                menu=$(mostrarMenu "Consultar registros logs" \
+                    "Opción" "Descripción" \
+                    "1" "Consultar logs de copias de seguridad de directorios de trabajo" \
+                    "2" "Consultar logs de copias de seguridad de archivos de configuración" \
+                    "3" "Consultar logs de copias de seguridad espejo" \
+                    "4" "Salir")
+                
+                if [ $? -eq 0 ]; then
+                    case $menu in
+                    1) 
+                        # Consultar logs de copias de seguridad de directorios de trabajo
+
+                        mostrarLogs /backup/config/backups-home.log
+                    ;;
+                    2) 
+                        # Consultar logs de copias de seguridad de archivos de configuración
+
+                        mostrarLogs /backup/config/backups-etc.log
+                    ;;
+                    3) 
+                        # Consultar logs de copias de seguridad espejo
+
+                        mostrarLogs /backup/config/backups-espejo.log
+                    ;;
+                    4) 
+                        # Salir
+
+                        salida=1
+                    ;;
+                    esac
+                fi
             ;;
             8) 
                 # Salir

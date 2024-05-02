@@ -3,6 +3,6 @@ systemctl restart mount.service
 systemctl enable backups-etc.service
 systemctl restart backups-etc.service
 systemctl enable backups-home.service
-systemctl restart backups-home-service
+systemctl restart backups-home.service
 systemctl enable backups-mirror.service
 systemctl restart backups-mirror.service

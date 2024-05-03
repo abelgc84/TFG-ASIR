@@ -8,6 +8,10 @@ punto_montaje="/backup"
 
 while true; do
 
+    if [ ! -d $punto_montaje ]; then
+        mkdir $punto_montaje
+    fi
+
     df -h|grep $nfs_server>/dev/null
 
     if [ $? -ne 0 ]; then

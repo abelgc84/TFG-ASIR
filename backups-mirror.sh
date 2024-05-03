@@ -141,6 +141,6 @@ while true; do
             recorrerDirectorio $ruta $directorio
             recorrerEspejo $backupDestino/$directorio $ruta
 
-    done < "$configEspejo" | grep $USER
+    done<$configEspejo
 
 done

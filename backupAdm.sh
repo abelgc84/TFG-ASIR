@@ -603,8 +603,9 @@ while [ $salida -eq 0 ]; do
                     "Opción" "Descripción" \
                     "1" "Consultar logs de copias de seguridad de directorios de trabajo" \
                     "2" "Consultar logs de copias de seguridad de archivos de configuración" \
-                    "3" "Consultar logs de copias de seguridad espejo" \
-                    "4" "Salir")
+                    "3" "Consultar logs de copias de seguridad completa" \
+                    "4" "Consultar logs de copias de seguridad espejo" \
+                    "5" "Salir")
                 
                 if [ $? -eq 0 ]; then
                     case $menu in
@@ -619,15 +620,19 @@ while [ $salida -eq 0 ]; do
                         mostrarLogs /backup/config/backups-etc.log
                     ;;
                     3) 
+                        # Consultar logs de copias de seguridad completa
+
+                        mostrarLogs /backup/config/backups-completos.log  
+                    ;;
+                    4) 
                         # Consultar logs de copias de seguridad espejo
 
                         mostrarLogs /backup/config/backups-espejo.log
                     ;;
-                    4) 
+                    5) 
                         # Salir
 
                         salida=1
-                    ;;
                     esac
                 fi
             ;;

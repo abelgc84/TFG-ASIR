@@ -34,7 +34,8 @@ while [ $salida -eq 0 ]; do
             "1" "Realizar copia de seguridad completa" \
             "2" "Configurar directorio espejo" \
             "3" "Restaurar copias de seguridad" \
-            "4" "Salir")
+            "4" "Eliminar copias de seguridad" \
+            "5" "Salir")
 
         if [ $? -eq 0 ]; then
             case $main in
@@ -117,8 +118,16 @@ while [ $salida -eq 0 ]; do
                 fi
             ;;
             4) 
-                # Salir
+                # Eliminar copias de seguridad
             
+                copia=$(mostrarCopiasSeguridadCompleta)
+                if [ $? -eq 0 ]; then
+                    rm $backupDestino/$copia
+                fi
+            ;;
+            5)  
+                # Salir
+                
                 salida=1
             ;;
             esac

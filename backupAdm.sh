@@ -558,7 +558,7 @@ while [ $salida -eq 0 ]; do
                                     done
                                 fi
                             ;;
-                            3) 
+                            3)
                                 # Salir
 
                                 salida=1
@@ -566,7 +566,7 @@ while [ $salida -eq 0 ]; do
                             esac
                         fi
                     ;;
-                    2) 
+                    2)
                         # Borrar copias de seguridad de archivos de configuración
 
                         copias=$(mostrarCopiasSeguridadEtc)
@@ -581,7 +581,7 @@ while [ $salida -eq 0 ]; do
                             done
                         fi
                     ;;
-                    3) 
+                    3)
                         # Salir
 
                         salida=1
@@ -622,7 +622,7 @@ while [ $salida -eq 0 ]; do
                     3) 
                         # Consultar logs de copias de seguridad completa
 
-                        mostrarLogs /backup/config/backups-completos.log  
+                        mostrarLogs /backup/config/backups-completos.log
                     ;;
                     4) 
                         # Consultar logs de copias de seguridad espejo

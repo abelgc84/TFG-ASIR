@@ -761,9 +761,8 @@ restaurarCopiaSeguridadCompleta () {
 #  $1: Log a mostrar
 #################################################
 mostrarLogs () {
-    zenity --text-info \
+    sort -r $1 | zenity --text-info \
         --title="Log de copias de seguridad" \
         --width="600" \
-        --height="500" \
-        --filename=$1
+        --height="500"
 }
